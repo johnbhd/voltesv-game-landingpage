@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import test from "node:test";
+import sharp from "sharp";
 import { machines, machineAt } from "../data/machines.ts";
 import { releaseAction, release } from "../data/site.ts";
 
@@ -14,6 +15,24 @@ test("every selectable machine has its real supplied artwork and anime pilot", (
     assert.ok(machine.pilot.artwork.source.includes("voltes character/"));
     assert.ok(machine.artwork.alt.includes(machine.name));
     assert.ok(!("stats" in machine), "Unverified game statistics must not be published");
+  }
+});
+
+test("all five pilots have full-body artwork with transparent backgrounds", async () => {
+  for (const machine of machines) {
+    const artwork = machine.pilot.fullBodyArtwork;
+    assert.ok(artwork, `${machine.pilot.name} needs full-body artwork`);
+    assert.ok(existsSync(resolve("public", artwork.source)), artwork.source);
+    assert.ok(existsSync(resolve("public", artwork.src.slice(1))), artwork.src);
+    assert.ok(artwork.height > artwork.width);
+
+    for (const path of [artwork.source, artwork.src.slice(1)]) {
+      const image = sharp(resolve("public", path));
+      const metadata = await image.metadata();
+      assert.equal(metadata.hasAlpha, true, path);
+      const pixel = await image.extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer();
+      assert.equal(pixel[3], 0, `${path} must have a transparent background`);
+    }
   }
 });
 

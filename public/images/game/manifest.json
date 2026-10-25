@@ -20,6 +20,16 @@
     "bytes": 32914
   },
   {
+    "source": "images/pilots/steve-full-body.png",
+    "src": "/images/pilots/steve-full-body.webp",
+    "width": 800,
+    "height": 1200,
+    "alt": "Steve Armstrong standing in pilot uniform, full body",
+    "outputWidth": 800,
+    "outputHeight": 1200,
+    "bytes": 105944
+  },
+  {
     "source": "img-assets/firing_voltes_character/VoltCrewzerEnergyBlast.png",
     "src": "/images/game/weapon-crewzer.webp",
     "width": 1254,
@@ -58,6 +68,16 @@
     "outputWidth": 640,
     "outputHeight": 640,
     "bytes": 33824
+  },
+  {
+    "source": "images/pilots/mark-full-body.png",
+    "src": "/images/pilots/mark-full-body.webp",
+    "width": 800,
+    "height": 1200,
+    "alt": "Mark Gordon standing in pilot uniform, full body",
+    "outputWidth": 800,
+    "outputHeight": 1200,
+    "bytes": 110090
   },
   {
     "source": "img-assets/firing_voltes_character/VoltBomberTwinBlast.png",
@@ -100,6 +120,16 @@
     "bytes": 27566
   },
   {
+    "source": "images/pilots/bigbert-full-body.png",
+    "src": "/images/pilots/bigbert-full-body.webp",
+    "width": 800,
+    "height": 1200,
+    "alt": "Big Bert Armstrong standing in pilot uniform, full body",
+    "outputWidth": 800,
+    "outputHeight": 1200,
+    "bytes": 103020
+  },
+  {
     "source": "img-assets/firing_voltes_character/VoltPanzerHeavyBlast.png",
     "src": "/images/game/weapon-panzer.webp",
     "width": 1254,
@@ -140,6 +170,16 @@
     "bytes": 35780
   },
   {
+    "source": "images/pilots/littlejohn-full-body.png",
+    "src": "/images/pilots/littlejohn-full-body.webp",
+    "width": 800,
+    "height": 1200,
+    "alt": "Little John Armstrong standing in pilot uniform, full body",
+    "outputWidth": 800,
+    "outputHeight": 1200,
+    "bytes": 114366
+  },
+  {
     "source": "img-assets/firing_voltes_character/VoltFrigatePulseShot.png",
     "src": "/images/game/weapon-frigate.webp",
     "width": 1254,
@@ -178,6 +218,16 @@
     "outputWidth": 640,
     "outputHeight": 640,
     "bytes": 41772
+  },
+  {
+    "source": "images/pilots/jamie-full-body.png",
+    "src": "/images/pilots/jamie-full-body.webp",
+    "width": 800,
+    "height": 1200,
+    "alt": "Jamie Robinson standing in pilot uniform, full body",
+    "outputWidth": 800,
+    "outputHeight": 1200,
+    "bytes": 118404
   },
   {
     "source": "img-assets/firing_voltes_character/VoltLanderWideEnergyBlast.png",

@@ -691,12 +691,6 @@
   margin-top: 2px;
 }
 
-.pilot .pilotDescription {
-  margin-top: 10px;
-  font: 14px/1.7 var(--font-body);
-  color: var(--muted);
-}
-
 .pilotNumber {
   flex-shrink: 0;
 }
@@ -786,7 +780,7 @@
   .abilitySpec strong {
     font-size: 20px;
   }
-  .abilitySpec p, .pilot .pilotDescription {
+  .abilitySpec p {
     font-size: 14px;
   }
   .showcaseFooter {

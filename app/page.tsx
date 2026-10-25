@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { MissionSection } from "@/components/sections/MissionSection";
 import { MachinesSection } from "@/components/sections/MachinesSection";
+import { PilotsSection } from "@/components/sections/PilotsSection";
 import { ReleaseSection } from "@/components/sections/ReleaseSection";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
         <HeroSection />
         <MissionSection />
         <MachinesSection />
+        <PilotsSection />
         <ReleaseSection />
       </main>
       <SiteFooter />

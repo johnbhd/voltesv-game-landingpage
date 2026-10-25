@@ -25,6 +25,7 @@ export type Machine = {
   pilot: {
     name: string;
     artwork: Artwork;
+    fullBodyArtwork: Artwork;
     description: string;
   };
 };
@@ -36,6 +37,16 @@ function artwork(source: string, slug: string, alt: string): Artwork {
     width: 1254,
     height: 1254,
     alt,
+  };
+}
+
+function pilotBody(id: string, name: string): Artwork {
+  return {
+    source: `images/pilots/${id}-full-body.png`,
+    src: `/images/pilots/${id}-full-body.webp`,
+    width: 800,
+    height: 1200,
+    alt: `${name} standing in pilot uniform, full body`,
   };
 }
 
@@ -75,7 +86,8 @@ export const machines: readonly Machine[] = [
         "pilot-steve",
         "Steve Armstrong in his red pilot uniform",
       ),
-      description: "Leader of the Voltes team and pilot of Volt Crewzer. A determined fighter who leads the formation into battle.",
+      fullBodyArtwork: pilotBody("steve", "Steve Armstrong"),
+      description: "The eldest Armstrong brother and leader of the Voltes team. A skilled pilot and marksman, Steve leads the fight against the Boazanian invaders.",
     },
   },
   {
@@ -113,7 +125,8 @@ export const machines: readonly Machine[] = [
         "pilot-mark",
         "Mark Gordon in his pilot uniform",
       ),
-      description: "Volt Bomber’s pilot and a trusted wingman to the team leader. Mark brings focus and resolve to the formation.",
+      fullBodyArtwork: pilotBody("mark", "Mark Gordon"),
+      description: "A rodeo champion with an independent spirit, Mark pilots Volt Bomber. His rivalry with Steve grows into a trusted partnership.",
     },
   },
   {
@@ -151,7 +164,8 @@ export const machines: readonly Machine[] = [
         "pilot-bigbert",
         "Big Bert Armstrong in his pilot uniform",
       ),
-      description: "Volt Panzer’s dependable pilot and the middle Armstrong brother. Big Bert stands ready to defend his teammates.",
+      fullBodyArtwork: pilotBody("bigbert", "Big Bert Armstrong"),
+      description: "The middle Armstrong brother and pilot of Volt Panzer. A powerful martial artist and defense tactician, Big Bert brings strength and a steady heart to the team.",
     },
   },
   {
@@ -189,7 +203,8 @@ export const machines: readonly Machine[] = [
         "pilot-littlejohn",
         "Little John Armstrong in his pilot uniform",
       ),
-      description: "The youngest Armstrong brother and pilot of Volt Frigate. Little John helps keep the team’s machines ready for battle.",
+      fullBodyArtwork: pilotBody("littlejohn", "Little John Armstrong"),
+      description: "The youngest Armstrong brother and pilot of Volt Frigate. A gifted young inventor, Little John puts his knowledge of machines to work for the team.",
     },
   },
   {
@@ -227,7 +242,8 @@ export const machines: readonly Machine[] = [
         "pilot-jamie",
         "Jamie Robinson in her pilot uniform",
       ),
-      description: "Volt Lander’s courageous pilot, always looking out for the team. Jamie brings a steady fighting spirit to the formation.",
+      fullBodyArtwork: pilotBody("jamie", "Jamie Robinson"),
+      description: "A trained ninja and pilot of Volt Lander. Jamie’s quick reflexes and calm judgment help keep the team united when the battle gets tough.",
     },
   },
 ];

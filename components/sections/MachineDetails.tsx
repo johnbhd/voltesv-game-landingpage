@@ -57,7 +57,11 @@ export function MachineDetails({ machine, active }: { machine: Machine; active: 
           </dd>
         </div>
       </dl>
-      <div className={styles.pilot}>
+      <a
+        className={styles.pilot}
+        href={"#pilot-" + machine.id}
+        aria-label={"Meet " + machine.pilot.name}
+      >
         <Image
           src={machine.pilot.artwork.src}
           alt={machine.pilot.artwork.alt}
@@ -68,10 +72,9 @@ export function MachineDetails({ machine, active }: { machine: Machine; active: 
         <div>
           <p className={styles.pilotLabel}>YOUR PILOT</p>
           <span>{machine.pilot.name}</span>
-          <p className={styles.pilotDescription}>{machine.pilot.description}</p>
         </div>
         <span className={styles.pilotNumber}>{machine.number}</span>
-      </div>
+      </a>
     </div>
   );
 }

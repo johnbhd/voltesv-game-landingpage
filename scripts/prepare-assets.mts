@@ -9,6 +9,7 @@ const assets = [
   ...machines.flatMap((machine) => [
     machine.artwork,
     machine.pilot.artwork,
+    machine.pilot.fullBodyArtwork,
     machine.primaryWeapon.artwork,
     machine.specialAbility.artwork,
   ]),
@@ -22,12 +23,18 @@ for (const asset of assets) {
     asset.source.includes("firing_voltes_character/")
     || asset.source.includes("skills/")
   );
-  const width = supporting
-    ? 256
-    : asset.source.includes("voltes character/") ? 640 : 1254;
+  const fullBody = asset.source.startsWith("images/pilots/");
+  let width = 1254;
+  if (fullBody) {
+    width = 800;
+  } else if (supporting) {
+    width = 256;
+  } else if (asset.source.includes("voltes character/")) {
+    width = 640;
+  }
   const result = await sharp(resolve("public", asset.source))
     .resize({ width, withoutEnlargement: true })
-    .webp({ quality: 84, effort: 5 })
+    .webp({ quality: fullBody ? 90 : 84, alphaQuality: 100, effort: 5 })
     .toFile(output);
   manifest.push({
     ...asset,

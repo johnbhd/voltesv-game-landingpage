@@ -131,6 +131,47 @@ try {
   });
   await screenshot("desktop-hero");
   const desktopVitals = await evaluate("window.__vitals");
+  await check("full-body pilots follow machines without repeating their introductions", async () => {
+    assert.equal(await evaluate("document.querySelector('#pilots')?.previousElementSibling.id"), "machines");
+    assert.match(await evaluate("document.querySelector('#pilots h2').textContent"), /FIVE PILOTS.*ONE MISSION/s);
+    await evaluate("document.querySelector('#pilots').scrollIntoView({behavior:'instant'})");
+    assert.equal(await evaluate("document.querySelectorAll('#pilots article').length"), 5);
+
+    for (const [id, name, assignment] of [
+      ["crewzer", "Steve Armstrong", "Volt Crewzer"],
+      ["bomber", "Mark Gordon", "Volt Bomber"],
+      ["panzer", "Big Bert Armstrong", "Volt Panzer"],
+      ["frigate", "Little John Armstrong", "Volt Frigate"],
+      ["lander", "Jamie Robinson", "Volt Lander"],
+    ]) {
+      const selector = '#pilot-' + id;
+      const text = await evaluate(`document.querySelector('${selector}').textContent`);
+      assert.ok(text.includes(name));
+      assert.ok(text.includes(assignment));
+      await waitFor(() => evaluate(`document.querySelector('${selector} img').complete && document.querySelector('${selector} img').naturalWidth>0`), 'Pilot image did not load: ' + id);
+      const intro = await evaluate(`document.querySelector('${selector} [data-pilot-intro]').textContent`);
+      assert.ok(intro.length > 40);
+      assert.equal(await evaluate(`document.querySelector('#machines').textContent.includes(${JSON.stringify(intro)})`), false);
+    }
+    await screenshot("desktop-pilots");
+  });
+  await check("pilot roster scrolls on mobile and remains keyboard accessible", async () => {
+    await viewport(390, 844, true);
+    await evaluate("document.querySelector('#pilots').scrollIntoView({behavior:'instant'})");
+    assert.ok(await evaluate("document.documentElement.scrollWidth<=innerWidth+1"));
+    assert.ok(await evaluate("document.querySelector('#pilot-roster').scrollWidth>document.querySelector('#pilot-roster').clientWidth"));
+    await evaluate("document.querySelector('#pilot-roster').focus();document.querySelector('#pilot-roster').scrollTo({left:0,behavior:'instant'})");
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
+    await waitFor(() => evaluate("document.querySelector('#pilot-roster').scrollLeft>0"), "Keyboard did not scroll the pilot roster");
+    assert.ok(await evaluate("[...document.querySelectorAll('#pilots h3')].every(heading=>heading.scrollWidth<=heading.clientWidth+1)"));
+    await evaluate("document.querySelector('#pilot-roster').scrollTo({left:10000,behavior:'instant'})");
+    await delay(250);
+    assert.equal(await evaluate("document.activeElement.id"), "pilot-roster");
+    assert.ok(await evaluate("document.querySelector('#pilot-lander').getBoundingClientRect().right<=innerWidth+1"));
+    await screenshot("mobile-pilots");
+    await viewport(1440);
+  });
   await check("hero rotates the roster every five seconds independently from the showcase", async () => {
     await load();
     assert.equal(await evaluate("document.querySelector('[data-hero-machine]')?.dataset.heroMachine"), "crewzer");
@@ -268,7 +309,7 @@ try {
     for (const width of [360, 390, 768, 1024, 1440]) {
       await viewport(width, width < 769 ? 844 : 900, width < 769);
       assert.ok(await evaluate("document.documentElement.scrollWidth<=innerWidth+1"), `Page overflow at ${width}px`);
-      const clipped = await evaluate("[...document.querySelectorAll('h1,h2,h3')].filter(el=>{const r=el.getBoundingClientRect();return r.left < -1 || r.right > innerWidth+1}).map(el=>el.textContent)");
+      const clipped = await evaluate("[...document.querySelectorAll('h1,h2,h3')].filter(el=>{if(el.closest('#pilot-roster'))return false;const r=el.getBoundingClientRect();return r.left < -1 || r.right > innerWidth+1}).map(el=>el.textContent)");
       assert.deepEqual(clipped, [], `Clipped headings at ${width}px`);
     }
   });

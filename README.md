@@ -21,7 +21,7 @@ npm run build
 
 ## Visual checkpoint
 
-The first checkpoint includes the header, layered hero, mission transition and five-machine selector. A small availability section keeps the release/gameplay anchors useful. Full pilot, gameplay, skill, enemy and boss scenes follow after visual approval.
+The first checkpoint includes the header, layered hero, mission transition and five-machine selector. The approved follow-up adds a full-body pilot roster. A small availability section keeps the release/gameplay anchors useful. Full gameplay, skill, enemy and boss scenes remain planned.
 
 Machine/pilot/artwork relationships live in data/machines.ts. Navigation, environments and release state live in data/site.ts. Leave the release in preview until a real APK URL and confirmed version are supplied. The preview has no fabricated stats, gameplay captures, version or GitHub link.
 
@@ -46,9 +46,21 @@ Reduced motion keeps the five-second image changes but disables their animation.
 
 Choose Your Machine stays entirely manual. Its tabs, swipes, keyboard controls,
 and named Previous/Next buttons update the machine, primary weapon sprite,
-special ability artwork and description, and anime pilot information together.
+special ability artwork and description, and compact pilot identity together.
 Details reserve enough height for every machine to prevent selection layout jumps.
 
 The test suite includes content mapping and deterministic rotation-clock tests.
 Browser checks explicitly test both normal and reduced motion, independent of the
 host operating system's preference. See [enhancement notes](docs/interaction-enhancements.md).
+
+## Pilot roster
+
+The five pilots appear below the machine showcase with generated head-to-toe,
+transparent-background artwork and short introductions to their anime roles.
+The machine panel keeps the original small portrait and name, linking to the
+corresponding introduction instead of repeating its biography.
+
+The roster shows all five figures on large screens and uses a focusable horizontal
+scroll region on smaller screens. Source PNGs and optimized WebP images are saved
+under `public/images/pilots/`; `npm run assets:prepare` regenerates the derivatives.
+See [artwork references, prompts and verification](docs/pilot-artwork.md).

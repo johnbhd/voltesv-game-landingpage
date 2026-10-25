@@ -49,3 +49,18 @@ Architecture: thin server-composed `app/page.tsx`; `components/layout`, `ui`, `s
   Preview remains http://localhost:3005; no source asset, release availability,
   dependency, commit, push, or deployment changes were introduced by this pass.
 - See [enhancement decisions and verification](interaction-enhancements.md).
+
+## Full-body pilot roster
+
+- At the user's request, generated five standing head-to-toe transparent character
+  illustrations from the existing anime portraits using built-in imagegen.
+- Added the Pilots section directly after Machines, with brief anime introductions,
+  machine assignments, a desktop lineup and a native mobile horizontal scroll region.
+- Removed repeated pilot descriptions from machine details. Small original portraits
+  and names remain and link to the corresponding pilot introduction.
+- Source PNGs and optimized WebP assets live in `public/images/pilots/` and are
+  included in the existing asset-preparation command; source game art remains intact.
+- Build, lint, TypeScript, nine content/clock tests and 25 Chromium checks pass.
+  Desktop/mobile screenshots and an independent code review are complete.
+- Developed on main; the user requested committing and pushing this completed section.
+- See [artwork prompts, sources and verification](pilot-artwork.md).
