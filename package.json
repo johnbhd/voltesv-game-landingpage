@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test tests/content.test.mts tests/rotation.test.mts",
+    "assets:prepare": "node --experimental-strip-types scripts/prepare-assets.mts",
+    "test:browser": "node scripts/browser-check.mjs"
   },
   "dependencies": {
     "next": "16.4.3",

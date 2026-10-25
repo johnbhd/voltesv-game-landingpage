@@ -1,0 +1,10 @@
+.release { position: relative; overflow: clip; isolation: isolate; background: var(--background); }
+.inner { max-width: 1600px; margin: auto; padding: 100px var(--gutter) 60px; text-align: center; }
+.eyebrow { display: flex; justify-content: center; align-items: center; gap: 10px; font: 11px var(--font-mono); letter-spacing: .12em; color: #a1adbd; }.eyebrow > span { width: 4px; height: 4px; background: var(--gold); }
+.release h2 { font: 700 clamp(44px, 5.5vw, 80px)/1.03 var(--font-display); letter-spacing: -.04em; margin-top: 27px; }.release h2 span { color: var(--gold); }
+.description { font-size: 16px; color: var(--muted); margin-top: 22px; }
+.releaseButton { display: inline-flex; justify-content: space-between; align-items: center; gap: 50px; min-height: 55px; margin-top: 30px; padding: 0 26px; color: var(--background); background: var(--gold); border: 1px solid var(--gold); font: 700 12px var(--font-display); letter-spacing: .05em; }.releaseButton:disabled { background: #f6c744cc; color: #10131a; }
+.status { margin-top: 14px; font: 11px var(--font-mono); color: #99a6b7; letter-spacing: .08em; }
+.gameplay { margin: 50px auto 0; border-top: 1px solid var(--border); padding-top: 25px; max-width: 450px; display: flex; justify-content: center; align-items: center; gap: 14px; text-align: left; scroll-margin-top: 105px; }.playIcon { font-size: 22px; color: #8998ac; }.gameplay p { font: 11px var(--font-mono); color: #b0bdce; letter-spacing: .04em; }.gameplay p span { display: block; font: 14px/1.8 var(--font-body); color: #77869b; letter-spacing: 0; margin-top: 5px; }
+.watermark { position: absolute; z-index: -1; inset: -10% 0 0; font: italic 900 min(60vw, 700px)/1 Arial, sans-serif; text-align: center; color: #ffffff02; pointer-events: none; }
+@media (max-width: 768px) { .inner { padding-block: 78px 45px; }.release h2 { font-size: 46px; }.description { font-size: 16px; }.releaseButton { font-size: 11px; }.gameplay { gap: 10px; }.gameplay p { font-size: 10px; }.gameplay p span { font-size: 13px; } }

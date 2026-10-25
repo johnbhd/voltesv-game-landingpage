@@ -1,0 +1,5 @@
+.depth { --pointer-x: 0; --pointer-y: 0; --hero-scroll: 0px; position: relative; isolation: isolate; }
+.reveal { transition: clip-path .7s cubic-bezier(.2,.6,.2,1), opacity .6s ease-out, transform .7s ease-out; }
+.clip.hidden { clip-path: inset(0 0 100% 0); opacity: 0; }
+.settle.hidden { transform: scale(1.05); opacity: .5; }
+@media (prefers-reduced-motion: reduce) { .reveal, .clip.hidden, .settle.hidden { transition: none; clip-path: none; transform: none; opacity: 1; } }

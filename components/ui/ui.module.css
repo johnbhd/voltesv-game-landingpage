@@ -1,0 +1,6 @@
+.action { display: inline-flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 54px; padding: 0 24px; background: var(--gold); color: var(--background); font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--gold); transition: transform .18s ease-out, background .18s ease-out, box-shadow .18s ease-out; }
+.action:hover { background: #ffda65; transform: translateY(-2px); box-shadow: 0 4px 22px #f6c74415; }
+.action:active { transform: scale(.98); }
+.secondary { border-color: #ffffff40; background: #05070d66; color: var(--foreground); }
+.secondary:hover { background: #ffffff0d; box-shadow: none; border-color: #ffffff80; }
+@media (prefers-reduced-motion: reduce) { .action, .action:hover, .action:active { transition: none; transform: none; } }

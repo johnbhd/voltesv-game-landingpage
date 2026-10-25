@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# Voltes V Strike
 
-## Getting Started
+A cinematic promotional site for an unofficial Android arcade action fan project. Built with Next.js 16, React 19, TypeScript and CSS Modules, using the supplied game artwork.
 
-First, run the development server:
+## Local development
 
-```bash
+~~~sh
+npm install
+npm run assets:prepare
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+~~~
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. Source images in public/img-assets/ remain unchanged. The asset command creates smaller WebP copies, an asset manifest and the app icon using Next.js's installed Sharp dependency. Optimized assets are included in the working tree; regenerate only when source artwork changes.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+~~~sh
+npm test
+npm run lint
+npm run typecheck
+npm run build
+~~~
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Visual checkpoint
 
-## Learn More
+The first checkpoint includes the header, layered hero, mission transition and five-machine selector. A small availability section keeps the release/gameplay anchors useful. Full pilot, gameplay, skill, enemy and boss scenes follow after visual approval.
 
-To learn more about Next.js, take a look at the following resources:
+Machine/pilot/artwork relationships live in data/machines.ts. Navigation, environments and release state live in data/site.ts. Leave the release in preview until a real APK URL and confirmed version are supplied. The preview has no fabricated stats, gameplay captures, version or GitHub link.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The implementation environment blocks npm registry access. Motion, Superdesign, Playwright and font packages could not be installed. This checkpoint uses CSS animations, scoped pointer/scroll effects, swipe/keyboard controls and system font fallbacks. Browser verification uses an installed Chromium/Edge through its DevTools protocol, with no new dependency:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+~~~sh
+npm run start -- --port 3000
+npm run test:browser
+~~~
 
-## Deploy on Vercel
+Screenshots and the browser report go under ignored test-results/. Set BROWSER_PATH to an installed Chromium/Edge executable or BASE_URL to change the preview URL.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Browser checks default to http://localhost:3005; pass BASE_URL=http://localhost:3000 when using the default dev port. In managed Windows sandboxes where Chromium cannot start its nested GPU sandbox, the isolated test profile supports BROWSER_NO_SANDBOX=1. Set NEXT_PUBLIC_SITE_URL to the actual site origin before public hosting; its local default is http://localhost:3000.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [reference audit](docs/research.md) and [implementation record](docs/implementation.md).
+
+## Machine interaction enhancements
+
+The hero cycles through all five machines every five seconds while visible in a
+foreground tab. Scrolling away or hiding the tab pauses the remaining countdown.
+Reduced motion keeps the five-second image changes but disables their animation.
+
+Choose Your Machine stays entirely manual. Its tabs, swipes, keyboard controls,
+and named Previous/Next buttons update the machine, primary weapon sprite,
+special ability artwork and description, and anime pilot information together.
+Details reserve enough height for every machine to prevent selection layout jumps.
+
+The test suite includes content mapping and deterministic rotation-clock tests.
+Browser checks explicitly test both normal and reduced motion, independent of the
+host operating system's preference. See [enhancement notes](docs/interaction-enhancements.md).

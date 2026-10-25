@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated local browser profiles and verification artifacts.
+    ".cache/**",
+    "test-results/**",
   ]),
 ]);
 

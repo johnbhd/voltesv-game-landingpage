@@ -1,0 +1,35 @@
+.header { position: fixed; top: 0; inset-inline: 0; z-index: 50; border-bottom: 1px solid #ffffff16; transition: background .2s, border-color .2s; }
+.scrolled { background: #05070df2; backdrop-filter: blur(14px); border-color: #ffffff20; }
+.headerInner { max-width: 1600px; margin: auto; display: flex; align-items: center; gap: 48px; height: 88px; padding-inline: var(--gutter); }
+.wordmark { display: flex; align-items: center; gap: 10px; font: 800 15px/1 var(--font-display); letter-spacing: .08em; flex-shrink: 0; }
+.emblem { font: italic 900 44px/.8 Arial, sans-serif; color: var(--gold); margin-right: 3px; }
+.wordmarkSub { display: block; font: 500 9px/1.7 var(--font-body); letter-spacing: .47em; color: var(--muted); padding-left: 1px; }
+.navigation { margin-inline: auto; display: flex; gap: 40px; }
+.navigation a { display: flex; align-items: center; gap: 9px; min-height: 44px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #c4ccd7; transition: color .15s; }
+.navigation a:hover { color: var(--gold); }
+.navIndex { color: #657385; font: 10px var(--font-mono); }
+.headerCta { display: flex; align-items: center; gap: 24px; font: 700 11px var(--font-display); text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid var(--gold); min-height: 44px; color: var(--gold); }
+.menuToggle { display: none; }
+.footer { max-width: 1600px; margin: auto; padding: 36px var(--gutter); display: flex; align-items: center; gap: 48px; border-top: 1px solid var(--border); }
+.footerBrand { font: 700 14px var(--font-display); letter-spacing: -.01em; }
+.footerBrand span { color: var(--muted); font-weight: 400; }
+.footer p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.footer p span { color: #79889b; }
+.backTop { margin-left: auto; display: inline-flex; align-items: center; gap: 20px; min-height: 44px; color: #c2cbd8; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+@media (max-width: 1000px) { .headerInner { gap: 24px; } .navigation { gap: 22px; } }
+@media (max-width: 768px) {
+  .headerInner { height: 72px; gap: 20px; }
+  .wordmark { font-size: 12px; } .emblem { font-size: 36px; } .wordmarkSub { font-size: 8px; }
+  .headerCta { margin-left: auto; font-size: 10px; gap: 10px; } .headerCta svg { width: 14px; }
+  .navigation { display: none; position: absolute; top: 72px; inset-inline: 0; padding: 16px var(--gutter) 28px; background: #05070dfa; border-bottom: 1px solid var(--border); }
+  .navigation.open { display: grid; gap: 4px; }
+  .navigation a { min-height: 54px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .menuToggle { display: grid; place-content: center; gap: 6px; width: 44px; height: 44px; border: 1px solid var(--border); background: transparent; color: var(--foreground); flex-shrink: 0; }
+  .menuToggle span { width: 16px; height: 1px; background: currentColor; }
+  .menuToggle[aria-expanded="true"] span:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .menuToggle[aria-expanded="true"] span:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+  .footer { flex-wrap: wrap; gap: 16px 24px; padding-block: 28px; }
+  .footer p { order: 3; width: 100%; } .backTop { font-size: 9px; }
+}
+@media (max-width: 380px) { .headerInner { gap: 10px; } .headerCta { font-size: 9px; gap: 6px; } }
+@media (prefers-reduced-motion: reduce) { .header, .navigation a { transition: none; } }

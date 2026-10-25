@@ -1,0 +1,641 @@
+.hero {
+  position: relative;
+  isolation: isolate;
+  min-height: max(820px, 100svh);
+  overflow: clip;
+  background: #05070d;
+}
+
+.environment {
+  position: absolute;
+  inset: -28px;
+  z-index: -3;
+  transform: translate(calc(var(--pointer-x) * -4px), calc(var(--pointer-y) * -4px + var(--hero-scroll) * .5));
+}
+
+.map {
+  object-fit: cover;
+  object-position: 50% 40%;
+  opacity: .6;
+  filter: saturate(.65);
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(90deg, #05070d 0%, #05070df2 25%, #05070d80 64%, #05070d55), linear-gradient(0deg, #05070d 0%, transparent 27%, #05070d22 65%, #05070dbb 100%);
+}
+
+.topline {
+  position: absolute;
+  top: 119px;
+  inset-inline: var(--gutter);
+  max-width: calc(1600px - var(--gutter) * 2);
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  font: 9px var(--font-mono);
+  color: #91a9bd88;
+  letter-spacing: .14em;
+}
+
+.heroInner {
+  position: relative;
+  max-width: 1600px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 52% 48%;
+  align-items: center;
+  min-height: max(820px, 100svh);
+  padding: 160px var(--gutter) 136px;
+}
+
+.copy {
+  position: relative;
+  z-index: 3;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 11px var(--font-mono);
+  letter-spacing: .16em;
+  color: #b6c3d4;
+  margin-bottom: 30px;
+}
+
+.eyebrow > span:first-child {
+  width: 5px;
+  height: 5px;
+  background: var(--gold);
+  box-shadow: 0 0 12px #f6c74444;
+}
+
+.eyebrowLine {
+  display: inline-block;
+  width: 48px;
+  height: 1px;
+  background: #ffffff25;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(66px, 7.7vw, 124px);
+  line-height: .95;
+  letter-spacing: -.055em;
+  margin-left: -5px;
+}
+
+.title > span {
+  display: block;
+  font-size: 1.31em;
+  letter-spacing: -.065em;
+}
+
+.period {
+  color: var(--gold);
+}
+
+.tagline {
+  font: 500 12px var(--font-display);
+  letter-spacing: .25em;
+  margin-top: 28px;
+  color: #e0e5ed;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--muted);
+  margin-top: 17px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 31px;
+}
+
+.platform {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 10px var(--font-mono);
+  color: #99a6b7;
+  letter-spacing: .06em;
+  margin-top: 23px;
+}
+
+.platformIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid #8190a244;
+  font: 700 9px var(--font-display);
+}
+
+.separator {
+  color: #404c5e;
+  padding-inline: 3px;
+}
+
+.visual {
+  position: relative;
+  width: 130%;
+  margin-left: -22%;
+  aspect-ratio: 1;
+  z-index: 1;
+}
+
+.target {
+  position: absolute;
+  inset: 7%;
+  border: 1px solid #78c5eb21;
+  border-radius: 50%;
+  transform: translate(calc(var(--pointer-x) * 8px), calc(var(--pointer-y) * 8px));
+}
+
+.target::before, .target::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -6%;
+  width: 112%;
+  height: 1px;
+  background: #80c5ed20;
+}
+
+.target::after {
+  transform: rotate(90deg);
+}
+
+.targetInner {
+  position: absolute;
+  inset: 9%;
+  border: 1px dashed #93c7e322;
+  border-radius: 50%;
+}
+
+.targetCross {
+  position: absolute;
+  inset: -3%;
+  border: 1px solid #b1daff0a;
+  border-radius: 50%;
+}
+
+.orbitText {
+  position: absolute;
+  top: 50%;
+  right: -50px;
+  writing-mode: vertical-rl;
+  color: #a7c6dd77;
+  font: 8px var(--font-mono);
+  letter-spacing: .2em;
+}
+
+.aircraftDepth {
+  position: absolute;
+  inset: 0;
+  transform: translate(calc(var(--pointer-x) * 12px), calc(var(--pointer-y) * 12px + var(--hero-scroll)));
+}
+
+.aircraftIntro {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.aircraft {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: rotate(16deg);
+  filter: drop-shadow(-18px 25px 24px #000a);
+}
+
+.machineLabel {
+  position: absolute;
+  right: -3%;
+  bottom: 4%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #c4d8e7;
+  font: 9px var(--font-mono);
+  letter-spacing: .08em;
+}
+
+.machineLabelLine {
+  width: 42px;
+  height: 1px;
+  background: #7aacd366;
+}
+
+.machineLabel small {
+  display: block;
+  color: #99a6b7;
+  font-size: 10px;
+  margin-top: 7px;
+  letter-spacing: .1em;
+}
+
+.visualCorner {
+  position: absolute;
+  top: 4%;
+  right: 9%;
+  color: #98badc66;
+  font: 22px var(--font-mono);
+}
+
+.particleA, .particleB {
+  position: absolute;
+  width: 2px;
+  height: 30px;
+  background: linear-gradient(transparent, #d4f4ff55, transparent);
+  transform: translate(calc(var(--pointer-x) * 18px), calc(var(--pointer-y) * 18px));
+}
+
+.particleA {
+  top: 24%;
+  left: 12%;
+  rotate: 26deg;
+}
+
+.particleB {
+  right: 8%;
+  bottom: 32%;
+  rotate: 26deg;
+  height: 15px;
+}
+
+.heroBottom {
+  position: absolute;
+  bottom: 0;
+  inset-inline: var(--gutter);
+  max-width: calc(1600px - var(--gutter) * 2);
+  margin: auto;
+  min-height: 100px;
+  border-top: 1px solid #ffffff1c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.scroll {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font: 8px var(--font-mono);
+  letter-spacing: .12em;
+  min-height: 44px;
+  color: #acb7c7;
+}
+
+.scroll > span {
+  width: 45px;
+  height: 1px;
+  background: #ffffff33;
+}
+
+.scroll svg {
+  width: 13px;
+}
+
+.unitCount {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font: 11px var(--font-mono);
+  color: #6f7f93;
+}
+
+.unitCount > span:first-child {
+  color: var(--gold);
+}
+
+.unitCount i {
+  width: 65px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold) var(--roster-progress, 20%), #ffffff22 var(--roster-progress, 20%));
+}
+
+.unitCaption {
+  font-size: 8px;
+  letter-spacing: .15em;
+  margin-left: 4px;
+}
+
+.heroBottom p {
+  font: 9px/1.9 var(--font-mono);
+  text-align: right;
+  color: #d0d9e4;
+  letter-spacing: .05em;
+}
+
+.heroBottom p span {
+  color: #76869b;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .target {
+    animation: hudIn .6s .15s both;
+  }
+  .aircraftIntro {
+    animation: aircraftIn .6s .3s both;
+  }
+  .title {
+    animation: titleIn .45s .5s both;
+  }
+  .eyebrow, .tagline, .description {
+    animation: copyIn .35s .7s both;
+  }
+  .actions, .platform {
+    animation: copyIn .3s .85s both;
+  }
+  .scroll svg {
+    animation: scrollLine 2.5s ease-in-out 1.2s infinite;
+  }
+}
+
+@keyframes hudIn {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+}
+
+@keyframes aircraftIn {
+  from {
+    opacity: 0;
+    scale: .94;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes titleIn {
+  from {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 14px;
+  }
+  to {
+    clip-path: inset(0);
+    translate: 0 0;
+  }
+}
+
+@keyframes copyIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrollLine {
+  0%, 70%, 100% {
+    translate: 0 0;
+  }
+  35% {
+    translate: 0 4px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .heroInner {
+    min-height: 980px;
+  }
+  .hero {
+    min-height: max(980px, 100svh);
+  }
+}
+
+@media (max-width: 1080px) and (min-width: 769px) {
+  .heroInner {
+    grid-template-columns: 56% 44%;
+  }
+  .visual {
+    width: 155%;
+    margin-left: -34%;
+  }
+  .title {
+    font-size: 8vw;
+  }
+  .actions {
+    gap: 10px;
+  }
+  .actions a {
+    padding-inline: 16px;
+    font-size: 10px;
+    gap: 18px;
+  }
+  .unitCaption {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: max(920px, 100svh);
+  }
+  .heroInner {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: max(920px, 100svh);
+    padding: 360px var(--gutter) 116px;
+  }
+  .environment {
+    transform: none;
+  }
+  .map {
+    object-position: 45% 30%;
+    opacity: .46;
+  }
+  .vignette {
+    background: linear-gradient(0deg, #05070d 2%, #05070df5 26%, #05070d85 58%, #05070d66 100%);
+  }
+  .topline {
+    top: 98px;
+    font-size: 7px;
+    letter-spacing: .1em;
+  }
+  .topline span:last-child {
+    display: none;
+  }
+  .copy {
+    width: 100%;
+  }
+  .eyebrow {
+    font-size: 10px;
+    margin-bottom: 20px;
+    gap: 9px;
+  }
+  .eyebrowLine {
+    width: 28px;
+  }
+  .title {
+    font-size: clamp(53px, 14.7vw, 102px);
+    margin-left: -2px;
+  }
+  .title > span {
+    font-size: 1.34em;
+  }
+  .tagline {
+    font-size: 10px;
+    letter-spacing: .15em;
+    margin-top: 20px;
+  }
+  .description {
+    font-size: 16px;
+    margin-top: 14px;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    margin-top: 25px;
+  }
+  .actions a {
+    min-height: 50px;
+    font-size: 11px;
+  }
+  .platform {
+    font-size: 9px;
+    gap: 8px;
+    margin-top: 17px;
+  }
+  .visual {
+    position: absolute;
+    width: min(88vw, 460px);
+    top: 104px;
+    right: 1%;
+    margin: 0;
+    z-index: 1;
+    opacity: .88;
+  }
+  .aircraft {
+    transform: rotate(23deg);
+    filter: drop-shadow(-12px 12px 18px #0008);
+  }
+  .aircraftDepth {
+    transform: none;
+  }
+  .target {
+    inset: 10%;
+  }
+  .orbitText {
+    display: none;
+  }
+  .machineLabel {
+    display: none;
+  }
+  .heroBottom {
+    min-height: 80px;
+    gap: 12px;
+  }
+  .heroBottom p {
+    display: none;
+  }
+  .scroll {
+    font-size: 9px;
+    gap: 12px;
+  }
+  .scroll > span {
+    width: 24px;
+  }
+  .unitCount {
+    font-size: 10px;
+    gap: 10px;
+  }
+  .unitCount i {
+    width: 36px;
+  }
+  .unitCaption {
+    display: none;
+  }
+}
+
+@media (max-height: 600px) and (min-width: 769px) {
+  .hero, .heroInner {
+    min-height: 780px;
+  }
+}
+
+.aircraftLayer {
+  position: absolute;
+  inset: 0;
+}
+
+.target {
+  border-color: color-mix(in srgb, var(--hero-accent) 24%, transparent);
+  box-shadow: 0 0 64px -46px var(--hero-accent);
+  transition: border-color .6s, box-shadow .6s;
+}
+
+.machineLabelLine {
+  background: color-mix(in srgb, var(--hero-accent) 60%, white 10%);
+  transition: background .6s;
+}
+
+.artworkUnavailable {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aircraftArriving {
+    animation: rosterArrive .6s cubic-bezier(.2,.6,.3,1) both;
+  }
+  .aircraftLeaving {
+    animation: rosterLeave .6s ease-out both;
+  }
+}
+
+@keyframes rosterArrive {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes rosterLeave {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px) scale(.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aircraftLeaving {
+    display: none;
+  }
+  .target, .machineLabelLine {
+    transition: none;
+  }
+}

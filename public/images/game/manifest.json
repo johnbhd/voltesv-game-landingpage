@@ -1,0 +1,220 @@
+[
+  {
+    "source": "img-assets/aircraft character/VoltCruiser.png",
+    "src": "/images/game/volt-crewzer.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Crewzer, the red, blue and gold strike aircraft",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 155338
+  },
+  {
+    "source": "img-assets/voltes character/steve.png",
+    "src": "/images/game/pilot-steve.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Steve Armstrong in his red pilot uniform",
+    "outputWidth": 640,
+    "outputHeight": 640,
+    "bytes": 32914
+  },
+  {
+    "source": "img-assets/firing_voltes_character/VoltCrewzerEnergyBlast.png",
+    "src": "/images/game/weapon-crewzer.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Crewzer Energy Blast, a narrow blue energy projectile",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 7600
+  },
+  {
+    "source": "img-assets/skills/skill_crewzer_speed_burst.png",
+    "src": "/images/game/skill-crewzer.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Crewzer Overdrive ability emblem",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 21860
+  },
+  {
+    "source": "img-assets/aircraft character/VoltBomber.png",
+    "src": "/images/game/volt-bomber.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Bomber, the armored twin-cannon aircraft",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 170718
+  },
+  {
+    "source": "img-assets/voltes character/mark.png",
+    "src": "/images/game/pilot-mark.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Mark Gordon in his pilot uniform",
+    "outputWidth": 640,
+    "outputHeight": 640,
+    "bytes": 33824
+  },
+  {
+    "source": "img-assets/firing_voltes_character/VoltBomberTwinBlast.png",
+    "src": "/images/game/weapon-bomber.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Bomber Twin Blast projectile",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 5948
+  },
+  {
+    "source": "img-assets/skills/skill_bomber_burst_strike.png",
+    "src": "/images/game/skill-bomber.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Bombardment Strike ability emblem",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 18732
+  },
+  {
+    "source": "img-assets/aircraft character/VoltPanzer.png",
+    "src": "/images/game/volt-panzer.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Panzer, the heavy armored machine",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 193450
+  },
+  {
+    "source": "img-assets/voltes character/bigbert.png",
+    "src": "/images/game/pilot-bigbert.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Big Bert Armstrong in his pilot uniform",
+    "outputWidth": 640,
+    "outputHeight": 640,
+    "bytes": 27566
+  },
+  {
+    "source": "img-assets/firing_voltes_character/VoltPanzerHeavyBlast.png",
+    "src": "/images/game/weapon-panzer.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Panzer Heavy Blast projectile",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 8840
+  },
+  {
+    "source": "img-assets/skills/skill_panzer_power_shot.png",
+    "src": "/images/game/skill-panzer.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Power Shot ability emblem",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 22198
+  },
+  {
+    "source": "img-assets/aircraft character/VoltFrigate.png",
+    "src": "/images/game/volt-frigate.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Frigate, the blue armored aircraft",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 121006
+  },
+  {
+    "source": "img-assets/voltes character/littlejohn.png",
+    "src": "/images/game/pilot-littlejohn.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Little John Armstrong in his pilot uniform",
+    "outputWidth": 640,
+    "outputHeight": 640,
+    "bytes": 35780
+  },
+  {
+    "source": "img-assets/firing_voltes_character/VoltFrigatePulseShot.png",
+    "src": "/images/game/weapon-frigate.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Frigate Pulse Shot projectile",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 7768
+  },
+  {
+    "source": "img-assets/skills/skill_frigate_rapid_barrage.png",
+    "src": "/images/game/skill-frigate.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Rapid Barrage ability emblem",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 32144
+  },
+  {
+    "source": "img-assets/aircraft character/VoltLander.png",
+    "src": "/images/game/volt-lander.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Lander, the final machine in the five-unit formation",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 149370
+  },
+  {
+    "source": "img-assets/voltes character/jamie.png",
+    "src": "/images/game/pilot-jamie.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Jamie Robinson in her pilot uniform",
+    "outputWidth": 640,
+    "outputHeight": 640,
+    "bytes": 41772
+  },
+  {
+    "source": "img-assets/firing_voltes_character/VoltLanderWideEnergyBlast.png",
+    "src": "/images/game/weapon-lander.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Volt Lander Wide Energy Blast projectile",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 10812
+  },
+  {
+    "source": "img-assets/skills/skill_lander_energy_shield.png",
+    "src": "/images/game/skill-lander.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Energy Shield ability emblem",
+    "outputWidth": 256,
+    "outputHeight": 256,
+    "bytes": 21760
+  },
+  {
+    "source": "img-assets/maps/falconmap_start.png",
+    "src": "/images/game/ocean.webp",
+    "width": 941,
+    "height": 1672,
+    "outputWidth": 941,
+    "outputHeight": 1672,
+    "bytes": 245160
+  },
+  {
+    "source": "img-assets/optoinal/boazanian_earthbase.png",
+    "src": "/images/game/boazanian-base.webp",
+    "width": 941,
+    "height": 1672,
+    "outputWidth": 941,
+    "outputHeight": 1672,
+    "bytes": 281334
+  }
+]
