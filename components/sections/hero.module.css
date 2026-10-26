@@ -54,8 +54,8 @@
 .copy {
   position: relative;
   z-index: 3;
-  opacity: calc(1 - var(--hero-scroll-progress) * .24);
-  transform: translateY(calc(var(--hero-scroll-progress) * -18px));
+  opacity: calc(1 - var(--hero-scroll-progress) * .45);
+  transform: translateY(calc(var(--hero-scroll-progress) * -48px));
   will-change: opacity, transform;
 }
 
@@ -149,8 +149,9 @@
 
 .visual {
   position: relative;
-  width: 130%;
-  margin-left: -22%;
+  width: 104%;
+  max-width: min(720px, 68svh);
+  margin-left: -10%;
   aspect-ratio: 1;
   z-index: 1;
 }
@@ -208,6 +209,7 @@
   position: absolute;
   inset: 0;
   transform: translate(calc(var(--pointer-x) * 12px), calc(var(--pointer-y) * 12px + var(--hero-scroll)));
+  scale: calc(1 - var(--hero-scroll-progress) * .06);
 }
 
 .aircraftIntro {
@@ -349,20 +351,41 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .target {
-    animation: hudIn .6s .15s both;
+  :global([data-intro-ready="pending"]) .target,
+  :global([data-intro-ready="pending"]) .aircraftIntro,
+  :global([data-intro-ready="pending"]) .title,
+  :global([data-intro-ready="pending"]) .eyebrow,
+  :global([data-intro-ready="pending"]) .tagline,
+  :global([data-intro-ready="pending"]) .description,
+  :global([data-intro-ready="pending"]) .actions,
+  :global([data-intro-ready="pending"]) .platform {
+    opacity: 0;
   }
-  .aircraftIntro {
-    animation: aircraftIn .6s .3s both;
+
+  :global([data-intro-ready="true"]) .target {
+    animation: hudIn 1s .1s both;
   }
-  .title {
-    animation: titleIn .45s .5s both;
+
+  :global([data-intro-ready="true"]) .aircraftIntro {
+    animation: aircraftIn 1.3s .15s cubic-bezier(.16, 1, .3, 1) both;
   }
-  .eyebrow, .tagline, .description {
-    animation: copyIn .35s .7s both;
+
+  :global([data-intro-ready="true"]) .title {
+    animation: titleIn 1s .3s cubic-bezier(.16, 1, .3, 1) both;
   }
-  .actions, .platform {
-    animation: copyIn .3s .85s both;
+
+  :global([data-intro-ready="true"]) .eyebrow {
+    animation: copyIn .7s .2s both;
+  }
+
+  :global([data-intro-ready="true"]) .tagline,
+  :global([data-intro-ready="true"]) .description {
+    animation: copyIn .8s .65s both;
+  }
+
+  :global([data-intro-ready="true"]) .actions,
+  :global([data-intro-ready="true"]) .platform {
+    animation: copyIn .8s .85s both;
   }
   .scroll svg {
     animation: scrollLine 2.5s ease-in-out 1.2s infinite;
@@ -383,10 +406,12 @@
 @keyframes aircraftIn {
   from {
     opacity: 0;
-    scale: .94;
+    translate: 56px 42px;
+    scale: .84;
   }
   to {
     opacity: 1;
+    translate: 0 0;
     scale: 1;
   }
 }
@@ -394,7 +419,7 @@
 @keyframes titleIn {
   from {
     clip-path: inset(0 0 100% 0);
-    translate: 0 14px;
+    translate: 0 38px;
   }
   to {
     clip-path: inset(0);
@@ -405,9 +430,11 @@
 @keyframes copyIn {
   from {
     opacity: 0;
+    translate: 0 16px;
   }
   to {
     opacity: 1;
+    translate: 0 0;
   }
 }
 
@@ -434,8 +461,8 @@
     grid-template-columns: 56% 44%;
   }
   .visual {
-    width: 155%;
-    margin-left: -34%;
+    width: 112%;
+    margin-left: -18%;
   }
   .title {
     font-size: 8vw;
@@ -484,6 +511,7 @@
   }
   .copy {
     width: 100%;
+    transform: translateY(calc(var(--hero-scroll-progress) * -24px));
   }
   .eyebrow {
     font-size: 10px;
@@ -526,7 +554,8 @@
   }
   .visual {
     position: absolute;
-    width: min(76vw, 420px);
+    width: min(70vw, 390px);
+    max-width: none;
     top: 108px;
     left: 50%;
     right: auto;
@@ -540,7 +569,7 @@
     filter: drop-shadow(-12px 12px 18px #0008);
   }
   .aircraftDepth {
-    transform: translateY(calc(var(--hero-scroll-progress) * 18px));
+    transform: translateY(calc(var(--hero-scroll-progress) * 36px));
   }
   .target {
     inset: 10%;
@@ -579,7 +608,7 @@
 
 @media (max-width: 420px) {
   .visual {
-    width: min(76vw, 320px);
+    width: min(70vw, 300px);
     top: 112px;
   }
 }
@@ -656,5 +685,6 @@
   .copy, .environment, .target, .aircraftDepth {
     opacity: 1;
     transform: none;
+    scale: 1;
   }
 }

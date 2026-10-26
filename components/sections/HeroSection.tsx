@@ -23,7 +23,7 @@ export function HeroSection() {
       alt: "",
       width: 1254,
       height: 1254,
-      sizes: "(max-width: 768px) 78vw, 58vw",
+      sizes: "(max-width: 768px) 70vw, (max-width: 1080px) 48vw, 50vw",
     });
     const image = new window.Image();
     if (props.sizes) {
@@ -96,7 +96,7 @@ export function HeroSection() {
                       alt=""
                       width={1254}
                       height={1254}
-                      sizes="(max-width: 768px) 78vw, 58vw"
+                      sizes="(max-width: 768px) 70vw, (max-width: 1080px) 48vw, 50vw"
                       className={styles.aircraft}
                     />
                   </div>
@@ -116,7 +116,7 @@ export function HeroSection() {
                       alt={machine.artwork.alt}
                       width={1254}
                       height={1254}
-                      sizes="(max-width: 768px) 78vw, 58vw"
+                      sizes="(max-width: 768px) 70vw, (max-width: 1080px) 48vw, 50vw"
                       preload={machine.id === "crewzer"}
                       className={styles.aircraft}
                       data-hero-artwork

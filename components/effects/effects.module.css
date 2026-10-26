@@ -10,34 +10,49 @@
 .reveal {
   --reveal-delay: 0ms;
   transition:
-    clip-path .7s var(--reveal-delay) cubic-bezier(.2, .6, .2, 1),
-    opacity .6s var(--reveal-delay) ease-out,
-    transform .7s var(--reveal-delay) cubic-bezier(.2, .6, .2, 1);
+    clip-path 1s var(--reveal-delay) cubic-bezier(.16, 1, .3, 1),
+    opacity .85s var(--reveal-delay) ease-out,
+    transform 1.05s var(--reveal-delay) cubic-bezier(.16, 1, .3, 1);
 }
 
 .clip.hidden {
   clip-path: inset(0 0 100% 0);
+  transform: translateY(32px);
   opacity: 0;
 }
 
 .settle.hidden {
-  transform: scale(1.05);
-  opacity: .5;
+  transform: translateY(36px) scale(.94);
+  opacity: .15;
 }
 
 .rise.hidden {
-  transform: translateY(28px);
+  transform: translateY(56px);
   opacity: 0;
 }
 
 .slide-left.hidden {
-  transform: translateX(30px);
+  transform: translateX(56px);
   opacity: 0;
 }
 
 .slide-right.hidden {
-  transform: translateX(-30px);
+  transform: translateX(-56px);
   opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .rise.hidden {
+    transform: translateY(32px);
+  }
+
+  .slide-left.hidden {
+    transform: translateX(28px);
+  }
+
+  .slide-right.hidden {
+    transform: translateX(-28px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

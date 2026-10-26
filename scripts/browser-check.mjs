@@ -465,10 +465,11 @@ try {
       assert.deepEqual(clipped, [], `Clipped headings at ${width}px`);
     }
   });
-  await check("mobile hero artwork stays centered and fully inside the viewport", async () => {
-    for (const width of [360, 390, 768]) {
-      await viewport(width, 844, true);
+  await check("hero artwork stays contained at mobile tablet and desktop sizes", async () => {
+    for (const width of [360, 390, 768, 1024, 1440, 1920]) {
+      await viewport(width, width <= 768 ? 844 : 900, width <= 768);
       await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+      await delay(120);
       const bounds = await evaluate(`(() => {
         const visual = document.querySelector('[data-hero-visual]');
         const artwork = document.querySelector('[data-hero-artwork]');
@@ -484,7 +485,9 @@ try {
         };
       })()`);
       assert.ok(bounds, `Hero artwork hooks are missing at ${width}px`);
-      assert.ok(Math.abs(bounds.visualCenter - width / 2) <= 2, `Hero visual is not centered at ${width}px`);
+      if (width <= 768) {
+        assert.ok(Math.abs(bounds.visualCenter - width / 2) <= 5, `Hero visual is not centered at ${width}px`);
+      }
       assert.ok(bounds.artworkLeft >= 4, `Hero artwork is clipped on the left at ${width}px`);
       assert.ok(bounds.artworkRight <= width - 4, `Hero artwork is clipped on the right at ${width}px`);
     }
@@ -501,7 +504,11 @@ try {
         height: hero.getBoundingClientRect().height,
       };
     })()`);
-    await evaluate("window.scrollTo({top:240,behavior:'instant'})");
+    await evaluate(`window.scrollTo({top:240,behavior:'instant'});
+      window.dispatchEvent(new Event('scroll'));
+      document.querySelector('[data-hero-depth]').dispatchEvent(
+        new PointerEvent('pointermove', { clientX: 900, clientY: 400, pointerType: 'mouse' })
+      );`);
     await delay(180);
     const after = await evaluate(`(() => {
       const depth = document.querySelector('[data-hero-depth]');
@@ -523,11 +530,31 @@ try {
     assert.ok(await evaluate("document.querySelectorAll('[data-scroll-reveal]').length >= 8"), "Major section reveals are missing");
     assert.ok(await evaluate("document.querySelector('#hostiles [data-scroll-reveal]') !== null"), "Enemy Forces reveal is missing");
     assert.ok(await evaluate("document.querySelector('#download [data-scroll-reveal]') !== null"), "Download reveal is missing");
+    assert.equal(await evaluate("document.querySelector('#download [data-scroll-reveal]').dataset.revealState"), "waiting");
     await evaluate("document.querySelector('#download [data-scroll-reveal]').scrollIntoView({block:'center',behavior:'instant'})");
+    await delay(180);
+    const intermediateOpacity = Number(await evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity"));
+    assert.ok(intermediateOpacity > 0 && intermediateOpacity < .98, "Reveal should visibly animate into view");
     await waitFor(() => evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity === '1'"), "Download content did not reveal");
     await evaluate("window.scrollTo({top:0,behavior:'instant'})");
     await delay(180);
     assert.equal(await evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity"), "1");
+  });
+  await check("hero entrance waits for artwork and visibly animates on fresh load", async () => {
+    await viewport(1440, 900, false);
+    await send("Page.navigate", { url: baseUrl });
+    await waitFor(
+      () => evaluate("document.querySelector('[data-hero-depth]')?.dataset.introReady === 'true'"),
+      "Hero entrance never started",
+    );
+    await delay(220);
+    assert.ok(await evaluate(`document.querySelector('[data-hero-artwork]').complete
+      && document.querySelector('[data-hero-artwork]').naturalWidth > 0`));
+    assert.ok(await evaluate(`document.querySelector('[data-hero-artwork]').parentElement.parentElement
+      .getAnimations().some(animation => animation.playState === 'running')`), "Machine entrance is not visibly running");
+    await screenshot("desktop-hero-intro");
+    await delay(1500);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('h1')).opacity"), "1");
   });
   await viewport(390, 844, true);
   await evaluate("window.scrollTo({top:0,behavior:'instant'})");

@@ -14,9 +14,28 @@ export function HeroDepth({ children }: { children: ReactNode }) {
 
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    let frame = 0;
+    let pointerFrame = 0;
+    let scrollFrame = 0;
+    let disposed = false;
+    let introTimer: ReturnType<typeof setTimeout> | undefined;
+
+    // Start the entrance after the first machine can actually be seen.
+    element.dataset.introReady = "pending";
+    const artwork = element.querySelector<HTMLImageElement>("[data-hero-artwork]");
+    const introDeadline = new Promise<void>((resolve) => {
+      introTimer = setTimeout(resolve, 1600);
+    });
+    const artworkReady = artwork?.decode().catch(() => undefined) ?? Promise.resolve();
+    void Promise.race([artworkReady, introDeadline]).then(() => {
+      clearTimeout(introTimer);
+      if (!disposed) {
+        element.dataset.introReady = "true";
+      }
+    });
 
     const resetPointer = () => {
+      cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
       element.style.setProperty("--pointer-x", "0");
       element.style.setProperty("--pointer-y", "0");
     };
@@ -33,8 +52,9 @@ export function HeroDepth({ children }: { children: ReactNode }) {
       }
 
       const bounds = element.getBoundingClientRect();
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
+      cancelAnimationFrame(pointerFrame);
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
         element.style.setProperty(
           "--pointer-x",
           String((event.clientX - bounds.left) / bounds.width * 2 - 1),
@@ -47,6 +67,7 @@ export function HeroDepth({ children }: { children: ReactNode }) {
     };
 
     const updateScroll = () => {
+      scrollFrame = 0;
       if (preference.matches) {
         resetMotion();
         return;
@@ -60,12 +81,13 @@ export function HeroDepth({ children }: { children: ReactNode }) {
       const travel = Math.max(1, Math.min(bounds.height, window.innerHeight));
       const progress = Math.min(1, Math.max(0, -bounds.top / travel));
       element.style.setProperty("--hero-scroll-progress", progress.toFixed(4));
-      element.style.setProperty("--hero-scroll", `${(progress * 60).toFixed(2)}px`);
+      element.style.setProperty("--hero-scroll", `${(progress * 100).toFixed(2)}px`);
     };
 
     const scheduleScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(updateScroll);
+      if (!scrollFrame) {
+        scrollFrame = requestAnimationFrame(updateScroll);
+      }
     };
 
     const preferencesChanged = () => {
@@ -89,7 +111,10 @@ export function HeroDepth({ children }: { children: ReactNode }) {
     scheduleScroll();
 
     return () => {
-      cancelAnimationFrame(frame);
+      disposed = true;
+      clearTimeout(introTimer);
+      cancelAnimationFrame(pointerFrame);
+      cancelAnimationFrame(scrollFrame);
       element.removeEventListener("pointermove", move);
       element.removeEventListener("pointerleave", resetPointer);
       window.removeEventListener("scroll", scheduleScroll);

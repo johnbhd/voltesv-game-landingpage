@@ -150,80 +150,82 @@ export function MachinesSection() {
             </button>
           ))}
         </div>
-        <div
-          className={styles.showcase}
-          id="machine-panel"
-          role="tabpanel"
-          aria-labelledby={"tab-" + machine.id}
-          tabIndex={0}
-        >
+        <Reveal kind="rise" delay={120}>
           <div
-            className={styles.stage}
-            onTouchStart={(event) => {
-              touch.current = {
-                x: event.touches[0].clientX,
-                y: event.touches[0].clientY,
-              };
-            }}
-            onTouchEnd={endTouch}
-            onTouchCancel={() => {
-              touch.current = null;
-            }}
+            className={styles.showcase}
+            id="machine-panel"
+            role="tabpanel"
+            aria-labelledby={"tab-" + machine.id}
+            tabIndex={0}
           >
-            <div className={styles.stageGrid} aria-hidden="true" />
-            <span className={styles.bigNumber} aria-hidden="true">{machine.number}</span>
-            <div className={styles.stageRing} aria-hidden="true" />
-            <span className={styles.crosshairA} aria-hidden="true">+</span>
-            <span className={styles.crosshairB} aria-hidden="true">+</span>
-            {selection.previous !== null && (
-              <div
-                key={"out-" + selection.previous}
-                className={[styles.artwork, styles.exiting].join(" ")}
-                aria-hidden="true"
-              >
-                <Image
-                  src={machineAt(selection.previous).artwork.src}
-                  alt=""
-                  width={1254}
-                  height={1254}
-                  sizes="(max-width: 768px) 85vw, 50vw"
-                />
-              </div>
-            )}
             <div
-              key={machine.id}
-              className={[styles.artwork, styles.entering].join(" ")}
+              className={styles.stage}
+              onTouchStart={(event) => {
+                touch.current = {
+                  x: event.touches[0].clientX,
+                  y: event.touches[0].clientY,
+                };
+              }}
+              onTouchEnd={endTouch}
+              onTouchCancel={() => {
+                touch.current = null;
+              }}
             >
-              {failedArtwork === machine.id ? (
-                <p className={styles.unavailable}>
-                  Artwork unavailable.<br />{machine.name}
-                </p>
-              ) : (
-                <Image
-                  src={machine.artwork.src}
-                  alt={machine.artwork.alt}
-                  width={1254}
-                  height={1254}
-                  sizes="(max-width: 768px) 85vw, 50vw"
-                  onError={() => setFailedArtwork(machine.id)}
-                />
+              <div className={styles.stageGrid} aria-hidden="true" />
+              <span className={styles.bigNumber} aria-hidden="true">{machine.number}</span>
+              <div className={styles.stageRing} aria-hidden="true" />
+              <span className={styles.crosshairA} aria-hidden="true">+</span>
+              <span className={styles.crosshairB} aria-hidden="true">+</span>
+              {selection.previous !== null && (
+                <div
+                  key={"out-" + selection.previous}
+                  className={[styles.artwork, styles.exiting].join(" ")}
+                  aria-hidden="true"
+                >
+                  <Image
+                    src={machineAt(selection.previous).artwork.src}
+                    alt=""
+                    width={1254}
+                    height={1254}
+                    sizes="(max-width: 768px) 85vw, 50vw"
+                  />
+                </div>
               )}
+              <div
+                key={machine.id}
+                className={[styles.artwork, styles.entering].join(" ")}
+              >
+                {failedArtwork === machine.id ? (
+                  <p className={styles.unavailable}>
+                    Artwork unavailable.<br />{machine.name}
+                  </p>
+                ) : (
+                  <Image
+                    src={machine.artwork.src}
+                    alt={machine.artwork.alt}
+                    width={1254}
+                    height={1254}
+                    sizes="(max-width: 768px) 85vw, 50vw"
+                    onError={() => setFailedArtwork(machine.id)}
+                  />
+                )}
+              </div>
+              <div className={styles.stageBottom}>
+                <span>UNIT {machine.number} / 05</span>
+                <span>VOLT SYSTEMS <span className={styles.statusDot} /></span>
+              </div>
             </div>
-            <div className={styles.stageBottom}>
-              <span>UNIT {machine.number} / 05</span>
-              <span>VOLT SYSTEMS <span className={styles.statusDot} /></span>
+            <div className={styles.detailsStack}>
+              {machines.map((item, index) => (
+                <MachineDetails
+                  key={item.id}
+                  machine={item}
+                  active={index === selection.active}
+                />
+              ))}
             </div>
           </div>
-          <div className={styles.detailsStack}>
-            {machines.map((item, index) => (
-              <MachineDetails
-                key={item.id}
-                machine={item}
-                active={index === selection.active}
-              />
-            ))}
-          </div>
-        </div>
+        </Reveal>
         <div className={styles.showcaseFooter}>
           <p><span aria-hidden="true">↔</span> SELECT A UNIT. FIND YOUR FORMATION.</p>
           <div className={styles.controls}>

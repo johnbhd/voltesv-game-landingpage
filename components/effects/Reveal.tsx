@@ -29,10 +29,11 @@ export function Reveal({
 
   useEffect(() => {
     const node = element.current;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (
       !node
       || !window.IntersectionObserver
-      || window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      || preference.matches
     ) {
       return;
     }
@@ -43,17 +44,31 @@ export function Reveal({
     }
 
     const frame = requestAnimationFrame(() => setHidden(true));
+    const show = () => {
+      cancelAnimationFrame(frame);
+      setHidden(false);
+      observer.disconnect();
+    };
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        setHidden(false);
-        observer.disconnect();
+        show();
       }
-    }, { rootMargin: "0px 0px -40px 0px", threshold: 0 });
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0 });
+    const preferenceChanged = () => {
+      if (preference.matches) {
+        show();
+      }
+    };
+    const focused = () => show();
     observer.observe(node);
+    preference.addEventListener("change", preferenceChanged);
+    node.addEventListener("focusin", focused);
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      preference.removeEventListener("change", preferenceChanged);
+      node.removeEventListener("focusin", focused);
     };
   }, []);
 
@@ -67,6 +82,7 @@ export function Reveal({
       className={`${styles.reveal} ${styles[kind]} ${hidden ? styles.hidden : ""} ${className}`}
       data-scroll-reveal
       data-reveal-kind={kind}
+      data-reveal-state={hidden ? "waiting" : "visible"}
       style={revealStyle}
     >
       {children}
