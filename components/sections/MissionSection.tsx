@@ -42,10 +42,6 @@ export function MissionSection() {
             <a href="#machines">MEET THE MACHINES <Arrow direction="right" /></a>
           </Reveal>
         </div>
-        <div className={styles.bottom}>
-          <span>EARTH DEFENSE / OPERATION STRIKE</span>
-          <span>THE FORMATION STARTS WITH YOU <span aria-hidden="true">↘</span></span>
-        </div>
       </div>
     </section>
   );

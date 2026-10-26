@@ -145,25 +145,12 @@
   height: 125%;
 }
 
-.footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  margin-top: 48px;
-  border-top: 1px solid #ffffff16;
-  padding-top: 22px;
-  color: #667386;
-  font: 8px var(--font-mono);
-  letter-spacing: .07em;
-}
-
 @media (max-width: 768px) {
   .inner {
     padding: 54px 0 40px;
   }
 
-  .warningLine,
-  .footer {
+  .warningLine {
     margin-inline: var(--gutter);
   }
 
@@ -189,13 +176,6 @@
     width: 90vw;
   }
 
-  .footer {
-    margin-top: 32px;
-  }
-
-  .footer > span:last-child {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

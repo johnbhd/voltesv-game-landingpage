@@ -159,18 +159,6 @@
   letter-spacing: .06em;
 }
 
-.sectionBottom {
-  margin-top: 48px;
-  border-top: 1px solid var(--border);
-  padding-top: 24px;
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  color: #7e8ea4;
-  font: 8px var(--font-mono);
-  letter-spacing: .06em;
-}
-
 @media (max-width: 1100px) {
   .gallery {
     margin-inline: calc(var(--gutter) * -1);
@@ -250,14 +238,6 @@
     font-size: 16px;
   }
 
-  .sectionBottom {
-    margin-top: 32px;
-    font-size: 7px;
-  }
-
-  .sectionBottom > span:last-child {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

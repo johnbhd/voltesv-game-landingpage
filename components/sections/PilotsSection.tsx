@@ -64,10 +64,6 @@ export function PilotsSection() {
           <span aria-hidden="true">↔</span>
           SCROLL TO MEET THE TEAM
         </p>
-        <div className={styles.sectionBottom}>
-          <span>FIVE INDIVIDUALS. ONE UNBREAKABLE TEAM.</span>
-          <span>EARTH DEFENSE / PILOT DOSSIERS</span>
-        </div>
       </div>
     </section>
   );

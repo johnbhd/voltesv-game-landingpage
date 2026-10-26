@@ -171,11 +171,6 @@ export function HostilesSection() {
             </div>
           </div>
         </Reveal>
-
-        <footer className={styles.footer}>
-          <span>BOAZANIAN FORCES / ARCHIVE ACCESS</span>
-          <span>SCAN STATUS // ACTIVE</span>
-        </footer>
       </div>
     </section>
   );

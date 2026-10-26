@@ -386,16 +386,6 @@
   transform: translateX(3px);
 }
 
-.footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  padding-top: 24px;
-  color: #69788c;
-  font: 8px var(--font-mono);
-  letter-spacing: .07em;
-}
-
 @keyframes scan {
   from {
     transform: translateY(0);
@@ -522,9 +512,6 @@
     font-size: 30px;
   }
 
-  .footer > span:last-child {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -39,10 +39,6 @@ export function BossSection() {
             </div>
           </div>
         </Reveal>
-        <div className={styles.footer}>
-          <span>ENEMY COMMAND VESSEL // DESIGNATION UNKNOWN</span>
-          <span>APPROACH WITH EXTREME CAUTION</span>
-        </div>
       </div>
     </section>
   );
