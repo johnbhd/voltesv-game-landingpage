@@ -585,16 +585,18 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .entering, .details {
-    animation: none;
-  }
-  .exiting {
-    display: none;
-  }
-  .selector button, .controls button {
-    transition: none;
-  }
+:global(html[data-motion="reduce"]) .entering,
+:global(html[data-motion="reduce"]) .details {
+  animation: none;
+}
+
+:global(html[data-motion="reduce"]) .exiting {
+  display: none;
+}
+
+:global(html[data-motion="reduce"]) .selector button,
+:global(html[data-motion="reduce"]) .controls button {
+  transition: none;
 }
 
 .machines {
@@ -806,14 +808,16 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .details[data-active="true"] {
-    animation: none;
-  }
-  .controls button, .controls button svg {
-    transition: none;
-  }
-  .controls button:hover svg, .controls button:active {
-    transform: none;
-  }
+:global(html[data-motion="reduce"]) .details[data-active="true"] {
+  animation: none;
+}
+
+:global(html[data-motion="reduce"]) .controls button,
+:global(html[data-motion="reduce"]) .controls button svg {
+  transition: none;
+}
+
+:global(html[data-motion="reduce"]) .controls button:hover svg,
+:global(html[data-motion="reduce"]) .controls button:active {
+  transform: none;
 }

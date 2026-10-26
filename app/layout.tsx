@@ -1,5 +1,25 @@
 ﻿import type { Metadata } from "next";
+import { MotionToggle } from "@/components/effects/MotionToggle";
 import "./globals.css";
+
+const motionPreferenceScript = `
+(() => {
+  let savedSetting = null;
+
+  try {
+    savedSetting = localStorage.getItem("voltes-motion");
+  } catch {
+    savedSetting = null;
+  }
+
+  const reducedBySystem = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const setting = savedSetting === "full" || savedSetting === "reduce"
+    ? savedSetting
+    : reducedBySystem ? "reduce" : "full";
+
+  document.documentElement.dataset.motion = setting;
+})();
+`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
@@ -17,10 +37,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: motionPreferenceScript }} />
+      </head>
       <body id="top">
         <a className="skip-link" href="#main-content">Skip to content</a>
         {children}
+        <MotionToggle />
       </body>
     </html>
   );

@@ -240,12 +240,10 @@
 
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .artwork {
-    transition: none;
-  }
+:global(html[data-motion="reduce"]) .artwork {
+  transition: none;
+}
 
-  .pilot:hover .artwork {
-    transform: none;
-  }
+:global(html[data-motion="reduce"]) .pilot:hover .artwork {
+  transform: none;
 }

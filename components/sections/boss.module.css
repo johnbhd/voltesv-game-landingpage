@@ -178,11 +178,9 @@
 
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .encounter {
-    transition: none;
-    opacity: 1;
-    transform: none;
-  }
+:global(html[data-motion="reduce"]) .reveal,
+:global(html[data-motion="reduce"]) .encounter {
+  transition: none;
+  opacity: 1;
+  transform: none;
 }

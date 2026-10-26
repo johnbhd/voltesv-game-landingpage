@@ -1,0 +1,62 @@
+.toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 90;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+  border: 1px solid #f6c74470;
+  border-radius: 2px;
+  background: #070b12eb;
+  color: #e8edf5;
+  box-shadow: 0 10px 30px #0008;
+  font: 700 9px var(--font-mono);
+  letter-spacing: .1em;
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    color .18s ease,
+    transform .18s ease;
+}
+
+.toggle:hover {
+  border-color: var(--gold);
+  background: #111723f2;
+  color: #fff;
+}
+
+.toggle:active {
+  transform: scale(.98);
+}
+
+.indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6c7786;
+  box-shadow: 0 0 0 2px #6c778622;
+}
+
+.toggle[aria-pressed="true"] .indicator {
+  background: var(--cyan);
+  box-shadow: 0 0 10px #40d9ff99;
+}
+
+:global(html[data-motion="reduce"]) .toggle {
+  transition: none;
+}
+
+:global(html[data-motion="reduce"]) .toggle:active {
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .toggle {
+    right: 12px;
+    bottom: 12px;
+    padding-inline: 12px;
+  }
+}

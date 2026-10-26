@@ -7,6 +7,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { useReducedMotion } from "./motion-preference";
 import styles from "./effects.module.css";
 
 type RevealKind = "clip" | "settle" | "rise" | "slide-left" | "slide-right";
@@ -26,16 +27,17 @@ export function Reveal({
 }: RevealProps) {
   const element = useRef<HTMLDivElement>(null);
   const [hidden, setHidden] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const node = element.current;
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (
       !node
       || !window.IntersectionObserver
-      || preference.matches
+      || reducedMotion
     ) {
-      return;
+      const frame = requestAnimationFrame(() => setHidden(false));
+      return () => cancelAnimationFrame(frame);
     }
 
     // Only hide below-fold content after hydration. Server-rendered content is always readable.
@@ -54,23 +56,16 @@ export function Reveal({
         show();
       }
     }, { rootMargin: "0px 0px -12% 0px", threshold: 0 });
-    const preferenceChanged = () => {
-      if (preference.matches) {
-        show();
-      }
-    };
     const focused = () => show();
     observer.observe(node);
-    preference.addEventListener("change", preferenceChanged);
     node.addEventListener("focusin", focused);
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
-      preference.removeEventListener("change", preferenceChanged);
       node.removeEventListener("focusin", focused);
     };
-  }, []);
+  }, [reducedMotion]);
 
   const revealStyle = {
     "--reveal-delay": `${Math.min(400, Math.max(0, delay))}ms`,

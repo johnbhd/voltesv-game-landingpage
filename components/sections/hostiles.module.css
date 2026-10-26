@@ -514,15 +514,13 @@
 
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .scanLine {
-    animation: none;
-  }
+:global(html[data-motion="reduce"]) .scanLine {
+  animation: none;
+}
 
-  .hostileArtwork,
-  .selector,
-  .controls button,
-  .controls svg {
-    transition: none;
-  }
+:global(html[data-motion="reduce"]) .hostileArtwork,
+:global(html[data-motion="reduce"]) .selector,
+:global(html[data-motion="reduce"]) .controls button,
+:global(html[data-motion="reduce"]) .controls svg {
+  transition: none;
 }

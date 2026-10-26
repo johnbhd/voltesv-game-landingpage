@@ -117,6 +117,75 @@ try {
     assert.equal(await evaluate("getComputedStyle(document.querySelector('h1').closest('section')).position"), "relative");
     assert.ok(await evaluate("document.querySelector('h1').className.length>0"), "CSS Module class mappings are missing");
   });
+  await check("site animation control overrides system reduced motion and persists", async () => {
+    await send("Emulation.setEmulatedMedia", {
+      features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+    });
+    await evaluate("localStorage.removeItem('voltes-motion')");
+    await load();
+
+    assert.equal(
+      await evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"),
+      true,
+    );
+    assert.equal(await evaluate("document.documentElement.dataset.motion"), "reduce");
+    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]').getAttribute('aria-pressed')"), "false");
+
+    await evaluate("document.querySelector('[data-motion-toggle]').click()");
+    await waitFor(
+      () => evaluate("document.documentElement.dataset.motion === 'full'"),
+      "Animation override did not enable motion",
+    );
+    await delay(180);
+
+    assert.equal(await evaluate("localStorage.getItem('voltes-motion')"), "full");
+    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]').getAttribute('aria-pressed')"), "true");
+    assert.notEqual(await evaluate("getComputedStyle(document.querySelector('h1')).animationName"), "none");
+
+    await evaluate("window.scrollTo({top:240,behavior:'instant'});window.dispatchEvent(new Event('scroll'))");
+    await delay(180);
+    assert.ok(
+      await evaluate("Number(getComputedStyle(document.querySelector('[data-hero-depth]')).getPropertyValue('--hero-scroll-progress')) > 0"),
+      "Explicitly enabled hero parallax did not update",
+    );
+
+    await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+    await delay(180);
+    assert.equal(
+      await evaluate("document.querySelector('#download [data-scroll-reveal]').dataset.revealState"),
+      "waiting",
+    );
+    await evaluate("document.querySelector('#download [data-scroll-reveal]').scrollIntoView({block:'center',behavior:'instant'})");
+    await delay(180);
+    const revealOpacity = Number(await evaluate(
+      "getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity",
+    ));
+    assert.ok(
+      revealOpacity > 0 && revealOpacity < 1,
+      "Explicitly enabled section reveal was not visibly animating",
+    );
+    await waitFor(
+      () => evaluate("document.querySelector('#download [data-scroll-reveal]').dataset.revealState === 'visible'"),
+      "Section reveal did not complete",
+    );
+
+    await load();
+    assert.equal(await evaluate("document.documentElement.dataset.motion"), "full");
+    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]').getAttribute('aria-pressed')"), "true");
+
+    await evaluate("document.querySelector('[data-motion-toggle]').click()");
+    await waitFor(
+      () => evaluate("document.documentElement.dataset.motion === 'reduce'"),
+      "Animation override did not disable motion",
+    );
+    assert.equal(await evaluate("document.getAnimations().filter(animation => animation.playState === 'running').length"), 0);
+
+    await evaluate("localStorage.removeItem('voltes-motion')");
+    await send("Emulation.setEmulatedMedia", {
+      features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+    });
+    await load();
+  });
   await check("body copy follows the readable 16px minimum", async () => {
     assert.ok(await evaluate("parseFloat(getComputedStyle([...document.querySelector('h1').closest('section').querySelectorAll('p')].find(p=>p.textContent.includes('Take flight.'))).fontSize)>=16"), "Hero body copy is smaller than the specified 16px minimum");
   });
@@ -224,6 +293,17 @@ try {
 
       await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
       await waitFor(() => evaluate("document.querySelector('#boss img')?.complete && document.querySelector('#boss img')?.naturalWidth>0"), "Boss silhouette did not load");
+      await waitFor(
+        () => evaluate(`(() => {
+          const reveal = document.querySelector('#boss [data-scroll-reveal]');
+          const style = getComputedStyle(reveal);
+          return reveal.dataset.revealState === 'visible'
+            && style.opacity === '1'
+            && style.transform === 'none';
+        })()`),
+        "Boss reveal did not settle before measuring its silhouette",
+        2500,
+      );
       const bossBounds = await evaluate(`(()=>{
         const section=document.querySelector('#boss').getBoundingClientRect();
         const artwork=document.querySelector('[data-boss-artwork]');
@@ -233,7 +313,10 @@ try {
       })()`);
       assert.notEqual(bossBounds.position, "absolute", `Boss artwork must use normal flow at ${width}px`);
       assert.ok(Math.min(bossBounds.left, bossBounds.right) >= -1, `Boss horns must remain in the section at ${width}px: ${JSON.stringify(bossBounds)}`);
-      assert.ok(bossBounds.bottom >= (width < 769 ? 32 : 48), `Boss needs a safe bottom gap at ${width}px`);
+      assert.ok(
+        bossBounds.bottom >= (width < 769 ? 32 : 48),
+        `Boss needs a safe bottom gap at ${width}px: ${JSON.stringify(bossBounds)}`,
+      );
       assert.ok(bossBounds.separation >= -1, `Download section must not overlap the boss at ${width}px`);
     }
     await viewport(1440);

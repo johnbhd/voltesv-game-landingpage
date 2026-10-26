@@ -55,16 +55,14 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .clip.hidden,
-  .settle.hidden,
-  .rise.hidden,
-  .slide-left.hidden,
-  .slide-right.hidden {
-    transition: none;
-    clip-path: none;
-    transform: none;
-    opacity: 1;
-  }
+:global(html[data-motion="reduce"]) .reveal,
+:global(html[data-motion="reduce"]) .clip.hidden,
+:global(html[data-motion="reduce"]) .settle.hidden,
+:global(html[data-motion="reduce"]) .rise.hidden,
+:global(html[data-motion="reduce"]) .slide-left.hidden,
+:global(html[data-motion="reduce"]) .slide-right.hidden {
+  transition: none;
+  clip-path: none;
+  transform: none;
+  opacity: 1;
 }

@@ -32,4 +32,7 @@
   .footer p { order: 3; width: 100%; } .backTop { font-size: 9px; }
 }
 @media (max-width: 380px) { .headerInner { gap: 10px; } .headerCta { font-size: 9px; gap: 6px; } }
-@media (prefers-reduced-motion: reduce) { .header, .navigation a { transition: none; } }
+:global(html[data-motion="reduce"]) .header,
+:global(html[data-motion="reduce"]) .navigation a {
+  transition: none;
+}

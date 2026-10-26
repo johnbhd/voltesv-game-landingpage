@@ -3,4 +3,9 @@
 .action:active { transform: scale(.98); }
 .secondary { border-color: #ffffff40; background: #05070d66; color: var(--foreground); }
 .secondary:hover { background: #ffffff0d; box-shadow: none; border-color: #ffffff80; }
-@media (prefers-reduced-motion: reduce) { .action, .action:hover, .action:active { transition: none; transform: none; } }
+:global(html[data-motion="reduce"]) .action,
+:global(html[data-motion="reduce"]) .action:hover,
+:global(html[data-motion="reduce"]) .action:active {
+  transition: none;
+  transform: none;
+}

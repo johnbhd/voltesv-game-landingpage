@@ -76,4 +76,20 @@ main:focus { outline: none; }
 .skip-link { position: fixed; top: -100px; left: 20px; z-index: 100; background: var(--gold); color: var(--background); padding: 15px 20px; font-size: 14px; }
 .skip-link:focus { top: 14px; }
 @media (max-width: 768px) { :root { --gutter: 24px; } html { scroll-padding-top: 88px; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html[data-motion="reduce"] {
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion]) {
+    scroll-behavior: auto;
+  }
+
+  html:not([data-motion]) *,
+  html:not([data-motion]) *::before,
+  html:not([data-motion]) *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}

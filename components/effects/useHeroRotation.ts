@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type RefObject } from "react";
 import { machines } from "@/data/machines";
+import { isMotionReduced } from "./motion-preference";
 import { createRotationClock } from "./rotation-clock";
 
 export function useHeroRotation(root: RefObject<HTMLElement | null>) {
@@ -16,7 +17,6 @@ export function useHeroRotation(root: RefObject<HTMLElement | null>) {
       return;
     }
 
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const bounds = element.getBoundingClientRect();
     let visible = bounds.bottom > 0 && bounds.top < window.innerHeight;
     const clock = createRotationClock({
@@ -26,7 +26,7 @@ export function useHeroRotation(root: RefObject<HTMLElement | null>) {
       advance: () => {
         setSelection((value) => ({
           active: (value.active + 1) % machines.length,
-          previous: preference.matches ? null : value.active,
+          previous: isMotionReduced() ? null : value.active,
         }));
       },
     });
@@ -42,14 +42,12 @@ export function useHeroRotation(root: RefObject<HTMLElement | null>) {
 
     observer.observe(element);
     document.addEventListener("visibilitychange", refresh);
-    preference.addEventListener("change", refresh);
     refresh();
 
     return () => {
       clock.dispose();
       observer.disconnect();
       document.removeEventListener("visibilitychange", refresh);
-      preference.removeEventListener("change", refresh);
     };
   }, [root]);
 

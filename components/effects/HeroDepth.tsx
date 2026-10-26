@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { useReducedMotion } from "./motion-preference";
 import styles from "./effects.module.css";
 
 export function HeroDepth({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const element = root.current;
@@ -12,7 +14,6 @@ export function HeroDepth({ children }: { children: ReactNode }) {
       return;
     }
 
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pointer = window.matchMedia("(hover: hover) and (pointer: fine)");
     let pointerFrame = 0;
     let scrollFrame = 0;
@@ -47,7 +48,7 @@ export function HeroDepth({ children }: { children: ReactNode }) {
     };
 
     const move = (event: PointerEvent) => {
-      if (preference.matches || !pointer.matches || event.pointerType === "touch") {
+      if (reducedMotion || !pointer.matches || event.pointerType === "touch") {
         return;
       }
 
@@ -68,7 +69,7 @@ export function HeroDepth({ children }: { children: ReactNode }) {
 
     const updateScroll = () => {
       scrollFrame = 0;
-      if (preference.matches) {
+      if (reducedMotion) {
         resetMotion();
         return;
       }
@@ -91,7 +92,7 @@ export function HeroDepth({ children }: { children: ReactNode }) {
     };
 
     const preferencesChanged = () => {
-      if (preference.matches) {
+      if (reducedMotion) {
         resetMotion();
         return;
       }
@@ -106,7 +107,6 @@ export function HeroDepth({ children }: { children: ReactNode }) {
     element.addEventListener("pointerleave", resetPointer);
     window.addEventListener("scroll", scheduleScroll, { passive: true });
     window.addEventListener("resize", scheduleScroll);
-    preference.addEventListener("change", preferencesChanged);
     pointer.addEventListener("change", preferencesChanged);
     scheduleScroll();
 
@@ -119,10 +119,9 @@ export function HeroDepth({ children }: { children: ReactNode }) {
       element.removeEventListener("pointerleave", resetPointer);
       window.removeEventListener("scroll", scheduleScroll);
       window.removeEventListener("resize", scheduleScroll);
-      preference.removeEventListener("change", preferencesChanged);
       pointer.removeEventListener("change", preferencesChanged);
     };
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <div ref={root} className={styles.depth} data-hero-depth>
