@@ -34,10 +34,22 @@ Extend the existing image pipeline and Chromium checks. Review desktop/mobile.
   sections. Scanner state is independent of hero and machine state.
 - Next.js: read the installed next/image guide before implementation.
 - Verification: production build, ESLint and TypeScript pass; eleven content and
-  clock tests pass; thirty-one Chromium checks pass without console errors. The new
+  clock tests pass; thirty-two Chromium checks pass without console errors. The new
   checks cover all selectors, idle state, wrapping, keyboard input, rapid changes,
   layout stability, mobile scrolling, image fallback, boss containment, reduced
   motion, disabled JavaScript and boss artwork failure.
 - Final review found a missing boss artwork fallback and a reveal assertion that
   inspected the inner content instead of its animated wrapper. Both were corrected
   and verified with focused failing-then-passing browser checks before the full run.
+
+## Full-silhouette correction
+
+- Renamed the visible section from Hostile Database to Enemy Forces and aligned
+  the header link with the shorter Enemies label.
+- Changed the enemy artwork stack to participate in responsive layout while
+  keeping every sprite layered in the same grid cell with safe internal padding.
+- Changed the boss artwork from absolute positioning to normal flow, preserving
+  the cinematic overlap through margins and leaving a clear boundary before the
+  release section.
+- Browser geometry checks cover every enemy and the boss at 360, 390, 768, 1024
+  and 1440 pixels, including complete silhouettes, safe padding and section bounds.

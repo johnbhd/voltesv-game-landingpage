@@ -135,6 +135,8 @@ try {
     assert.equal(await evaluate("document.querySelector('#hostiles')?.previousElementSibling.id"), "pilots");
     assert.equal(await evaluate("document.querySelector('#boss')?.previousElementSibling.id"), "hostiles");
     assert.equal(await evaluate("document.querySelector('#download')?.previousElementSibling.id"), "boss");
+    assert.equal(await evaluate("document.querySelector('#hostiles h2').textContent.replace(/\\s+/g,' ').trim()"), "ENEMY FORCES");
+    assert.equal(await evaluate("[...document.querySelectorAll('#site-navigation a')].find(link=>link.hash==='#hostiles').textContent.replace(/^\\d+/, '').trim()"), "Enemies");
     assert.equal(await evaluate("document.querySelectorAll('[data-enemy-selector]').length"), 7);
     await evaluate("document.querySelector('#hostiles').scrollIntoView({behavior:'instant'})");
 
@@ -178,11 +180,69 @@ try {
     assert.equal(await evaluate("document.querySelector('#hostile-scanner').getBoundingClientRect().height"), before);
     assert.equal(await evaluate("document.querySelectorAll('[data-hostile-art][data-active=true]').length"), 1);
   });
+  await check("enemy and boss artwork preserve full silhouettes at every viewport", async () => {
+    for (const width of [360, 390, 768, 1024, 1440]) {
+      await viewport(width, width < 769 ? 844 : 900, width < 769);
+      await evaluate("document.querySelector('#hostiles').scrollIntoView({behavior:'instant'})");
+      const safeGap = width < 769 ? 20 : 28;
+
+      for (const id of [
+        "scout-drone",
+        "scout-drone-02",
+        "hornet-fighter",
+        "heavy-bomber",
+        "crab-tank",
+        "boazanian-spike",
+        "elite-commander",
+      ]) {
+        await evaluate(`document.querySelector('[data-enemy-selector="${id}"]').click()`);
+        await waitFor(() => evaluate(`document.querySelector('[data-hostile-art="${id}"] img')?.complete && document.querySelector('[data-hostile-art="${id}"] img')?.naturalWidth>0`), "Enemy silhouette did not load: " + id);
+        await delay(380);
+        const bounds = await evaluate(`(()=>{
+          const stage=document.querySelector('[data-hostile-stage]');
+          const image=document.querySelector('[data-hostile-art="${id}"] img');
+          if(!stage||!image)return null;
+          const s=stage.getBoundingClientRect();
+          const i=image.getBoundingClientRect();
+          const scale=Math.min(i.width/image.naturalWidth,i.height/image.naturalHeight);
+          const width=image.naturalWidth*scale;
+          const height=image.naturalHeight*scale;
+          const left=i.left+(i.width-width)/2;
+          const top=i.top+(i.height-height)/2;
+          return {position:getComputedStyle(image.parentElement.parentElement).position,left:left-s.left,right:s.right-(left+width),top:top-s.top,bottom:s.bottom-(top+height)};
+        })()`);
+        assert.ok(bounds, `Missing hostile artwork stage at ${width}px`);
+        assert.notEqual(bounds.position, "absolute", `Hostile stage must contribute layout height at ${width}px`);
+        assert.ok(Math.min(bounds.left, bounds.right, bounds.top, bounds.bottom) >= safeGap, `${id} needs a complete silhouette and safe padding at ${width}px: ${JSON.stringify(bounds)}`);
+      }
+
+      await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
+      await waitFor(() => evaluate("document.querySelector('#boss img')?.complete && document.querySelector('#boss img')?.naturalWidth>0"), "Boss silhouette did not load");
+      const bossBounds = await evaluate(`(()=>{
+        const section=document.querySelector('#boss').getBoundingClientRect();
+        const artwork=document.querySelector('[data-boss-artwork]');
+        const image=artwork.querySelector('img').getBoundingClientRect();
+        const release=document.querySelector('#download').getBoundingClientRect();
+        return {position:getComputedStyle(artwork).position,left:image.left-section.left,right:section.right-image.right,bottom:section.bottom-image.bottom,separation:release.top-section.bottom};
+      })()`);
+      assert.notEqual(bossBounds.position, "absolute", `Boss artwork must use normal flow at ${width}px`);
+      assert.ok(Math.min(bossBounds.left, bossBounds.right) >= -1, `Boss horns must remain in the section at ${width}px: ${JSON.stringify(bossBounds)}`);
+      assert.ok(bossBounds.bottom >= (width < 769 ? 32 : 48), `Boss needs a safe bottom gap at ${width}px`);
+      assert.ok(bossBounds.separation >= -1, `Download section must not overlap the boss at ${width}px`);
+    }
+    await viewport(1440);
+  });
   await check("boss artwork reveals once with a complete contained silhouette", async () => {
+    await load();
+    await delay(100);
     const revealSelector = "#boss [data-boss-reveal]";
     assert.ok(Number(await evaluate(`getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity`)) < 1, "Boss reveal should begin visually subdued while offscreen");
     await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
-    await delay(1100);
+    await waitFor(
+      () => evaluate(`Number(getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity) > .999`),
+      "Boss reveal did not reach full opacity",
+      2500,
+    );
     await waitFor(() => evaluate("document.querySelector('#boss img').complete && document.querySelector('#boss img').naturalWidth>0"), "Boss image did not load");
     const bossText = await evaluate("document.querySelector('#boss').textContent");
     assert.match(bossText, /WARNING/);
@@ -207,6 +267,7 @@ try {
     assert.ok(await evaluate("document.querySelector('#hostiles [aria-label=\"Select a hostile unit\"]').scrollLeft > 0"));
     await evaluate("document.querySelector('[data-enemy-selector=\"elite-commander\"]').click()");
     assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Elite Commander");
+    await delay(400);
     await screenshot("mobile-hostiles");
     await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
     await delay(1000);
@@ -514,7 +575,7 @@ try {
     await load();
     assert.equal(await evaluate("getComputedStyle(document.querySelector('h1')).opacity"), "1");
     assert.match(await evaluate("document.querySelector('#machine-panel [data-active=true] h3').textContent"), /Crewzer/);
-    assert.match(await evaluate("document.querySelector('#hostiles').textContent"), /HOSTILE.*DATABASE.*Scout Drone/s);
+    assert.match(await evaluate("document.querySelector('#hostiles').textContent"), /ENEMY.*FORCES.*Scout Drone/s);
     assert.match(await evaluate("document.querySelector('#boss').textContent"), /FINAL ENCOUNTER/);
     await send("Emulation.setScriptExecutionDisabled", { value: false });
   });

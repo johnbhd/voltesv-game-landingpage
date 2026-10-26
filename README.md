@@ -65,9 +65,9 @@ scroll region on smaller screens. Source PNGs and optimized WebP images are save
 under `public/images/pilots/`; `npm run assets:prepare` regenerates the derivatives.
 See [artwork references, prompts and verification](docs/pilot-artwork.md).
 
-## Hostile encounters
+## Enemy encounters
 
-The Hostile Database presents all seven supplied enemy sprites through a manual,
+Enemy Forces presents all seven supplied enemy sprites through a manual,
 keyboard-accessible scanner with cyclic Previous/Next controls. It remains on the
 selected target until the visitor changes it. Skull Fortress follows as a contained
 cinematic reveal using the supplied boss artwork and restrained red lighting.

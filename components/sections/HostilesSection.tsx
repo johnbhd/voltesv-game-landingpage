@@ -58,8 +58,8 @@ export function HostilesSection() {
           </p>
           <div className={styles.headingRow}>
             <h2 id="hostiles-title">
-              HOSTILE<br />
-              <span>DATABASE.</span>
+              ENEMY{" "}<br />
+              <span>FORCES</span>
             </h2>
             <p>
               Identify the machines standing between the Voltes team and Earth’s
@@ -69,7 +69,7 @@ export function HostilesSection() {
         </header>
 
         <div id="hostile-scanner" className={styles.scanner}>
-          <div className={styles.scanWindow}>
+          <div className={styles.scanWindow} data-hostile-stage>
             <div className={styles.reticle} aria-hidden="true" />
             <div className={styles.scanLine} aria-hidden="true" />
             <div className={styles.artworkStack}>

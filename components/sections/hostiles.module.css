@@ -71,7 +71,7 @@
 .scanner {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(330px, .7fr);
-  min-height: 680px;
+  align-items: stretch;
   border-top: 1px solid #ffffff25;
   border-bottom: 1px solid #ffffff18;
   background: #070a11d9;
@@ -79,10 +79,13 @@
 
 .scanWindow {
   position: relative;
+  display: grid;
+  place-items: stretch;
   min-width: 0;
-  min-height: 680px;
+  min-height: clamp(560px, 50vw, 720px);
   overflow: hidden;
   border-right: 1px solid #ffffff18;
+  padding: clamp(42px, 5vw, 72px);
   background:
     linear-gradient(135deg, #ffffff05, transparent 35%),
     radial-gradient(circle at center, #e3263614, transparent 52%);
@@ -153,10 +156,11 @@
 }
 
 .artworkStack {
-  position: absolute;
+  position: relative;
   z-index: 2;
-  inset: 42px;
   display: grid;
+  min-width: 0;
+  min-height: 0;
 }
 
 .hostileArtwork {
@@ -407,7 +411,7 @@
   }
 
   .scanWindow {
-    min-height: min(105vw, 650px);
+    min-height: clamp(500px, 86vw, 650px);
     border-right: 0;
     border-bottom: 1px solid #ffffff18;
   }
@@ -501,11 +505,12 @@
   }
 
   .scanWindow {
-    min-height: 108vw;
+    min-height: clamp(440px, 108vw, 650px);
+    padding: 34px 24px 50px;
   }
 
   .artworkStack {
-    inset: 34px 24px 50px;
+    min-height: 0;
   }
 
   .identity h3 {

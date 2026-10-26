@@ -65,7 +65,7 @@ Architecture: thin server-composed `app/page.tsx`; `components/layout`, `ui`, `s
 - Developed on main; the user requested committing and pushing this completed section.
 - See [artwork prompts, sources and verification](pilot-artwork.md).
 
-## Hostile Database and Skull Fortress
+## Enemy Forces and Skull Fortress
 
 - Added a manual seven-enemy scanner after Pilots using every supplied enemy
   sprite, with direct selectors, named cyclic controls and stable transitions.
@@ -76,6 +76,6 @@ Architecture: thin server-composed `app/page.tsx`; `components/layout`, `ui`, `s
   motion and remains readable without JavaScript.
 - Extended the image pipeline with eight optimized WebP assets and retained all
   original source images.
-- Build, lint, TypeScript, eleven content/clock tests and thirty-one Chromium checks
+- Build, lint, TypeScript, eleven content/clock tests and thirty-two Chromium checks
   pass. Desktop and mobile screenshots confirm contained artwork and no overflow.
 - See [hostile encounter decisions and verification](hostile-encounters.md).

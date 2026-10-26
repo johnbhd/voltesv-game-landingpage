@@ -18,6 +18,6 @@ export const environments = {
 export const navigation = [
   { label: "Mission", href: "#mission" },
   { label: "Machines", href: "#machines" },
-  { label: "Hostiles", href: "#hostiles" },
+  { label: "Enemies", href: "#hostiles" },
   { label: "Gameplay", href: "#gameplay" },
 ];
