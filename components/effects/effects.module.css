@@ -1,5 +1,55 @@
-.depth { --pointer-x: 0; --pointer-y: 0; --hero-scroll: 0px; position: relative; isolation: isolate; }
-.reveal { transition: clip-path .7s cubic-bezier(.2,.6,.2,1), opacity .6s ease-out, transform .7s ease-out; }
-.clip.hidden { clip-path: inset(0 0 100% 0); opacity: 0; }
-.settle.hidden { transform: scale(1.05); opacity: .5; }
-@media (prefers-reduced-motion: reduce) { .reveal, .clip.hidden, .settle.hidden { transition: none; clip-path: none; transform: none; opacity: 1; } }
+.depth {
+  --pointer-x: 0;
+  --pointer-y: 0;
+  --hero-scroll: 0px;
+  --hero-scroll-progress: 0;
+  position: relative;
+  isolation: isolate;
+}
+
+.reveal {
+  --reveal-delay: 0ms;
+  transition:
+    clip-path .7s var(--reveal-delay) cubic-bezier(.2, .6, .2, 1),
+    opacity .6s var(--reveal-delay) ease-out,
+    transform .7s var(--reveal-delay) cubic-bezier(.2, .6, .2, 1);
+}
+
+.clip.hidden {
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+}
+
+.settle.hidden {
+  transform: scale(1.05);
+  opacity: .5;
+}
+
+.rise.hidden {
+  transform: translateY(28px);
+  opacity: 0;
+}
+
+.slide-left.hidden {
+  transform: translateX(30px);
+  opacity: 0;
+}
+
+.slide-right.hidden {
+  transform: translateX(-30px);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .clip.hidden,
+  .settle.hidden,
+  .rise.hidden,
+  .slide-left.hidden,
+  .slide-right.hidden {
+    transition: none;
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+  }
+}

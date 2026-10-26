@@ -129,6 +129,12 @@ try {
     assert.match(await evaluate("document.querySelector('#gameplay').textContent"), /COMING SOON/);
     assert.equal(await evaluate("document.querySelector('h1').closest('section').querySelector('img[alt]').complete"), true);
   });
+  await check("fill images inside reveal wrappers keep a positioning context", async () => {
+    assert.equal(
+      await evaluate("getComputedStyle(document.querySelector('#mission img').parentElement).position"),
+      "relative",
+    );
+  });
   await screenshot("desktop-hero");
   const desktopVitals = await evaluate("window.__vitals");
   await check("hostile scanner maps seven sprites and stays manual with cyclic navigation", async () => {
@@ -239,7 +245,7 @@ try {
     assert.ok(Number(await evaluate(`getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity`)) < 1, "Boss reveal should begin visually subdued while offscreen");
     await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
     await waitFor(
-      () => evaluate(`Number(getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity) > .999`),
+      () => evaluate(`getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity === '1'`),
       "Boss reveal did not reach full opacity",
       2500,
     );
@@ -459,6 +465,70 @@ try {
       assert.deepEqual(clipped, [], `Clipped headings at ${width}px`);
     }
   });
+  await check("mobile hero artwork stays centered and fully inside the viewport", async () => {
+    for (const width of [360, 390, 768]) {
+      await viewport(width, 844, true);
+      await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+      const bounds = await evaluate(`(() => {
+        const visual = document.querySelector('[data-hero-visual]');
+        const artwork = document.querySelector('[data-hero-artwork]');
+        if (!visual || !artwork) return null;
+        const visualRect = visual.getBoundingClientRect();
+        const artworkRect = artwork.getBoundingClientRect();
+        return {
+          visualLeft: visualRect.left,
+          visualRight: visualRect.right,
+          visualCenter: visualRect.left + visualRect.width / 2,
+          artworkLeft: artworkRect.left,
+          artworkRight: artworkRect.right,
+        };
+      })()`);
+      assert.ok(bounds, `Hero artwork hooks are missing at ${width}px`);
+      assert.ok(Math.abs(bounds.visualCenter - width / 2) <= 2, `Hero visual is not centered at ${width}px`);
+      assert.ok(bounds.artworkLeft >= 4, `Hero artwork is clipped on the left at ${width}px`);
+      assert.ok(bounds.artworkRight <= width - 4, `Hero artwork is clipped on the right at ${width}px`);
+    }
+  });
+  await check("hero depth responds to scroll without moving the layout box", async () => {
+    await viewport(1440, 900, false);
+    await load();
+    const before = await evaluate(`(() => {
+      const depth = document.querySelector('[data-hero-depth]');
+      const hero = document.querySelector('[data-hero-machine]');
+      return {
+        progress: Number(getComputedStyle(depth).getPropertyValue('--hero-scroll-progress')),
+        top: hero.getBoundingClientRect().top,
+        height: hero.getBoundingClientRect().height,
+      };
+    })()`);
+    await evaluate("window.scrollTo({top:240,behavior:'instant'})");
+    await delay(180);
+    const after = await evaluate(`(() => {
+      const depth = document.querySelector('[data-hero-depth]');
+      const hero = document.querySelector('[data-hero-machine]');
+      return {
+        progress: Number(getComputedStyle(depth).getPropertyValue('--hero-scroll-progress')),
+        top: hero.getBoundingClientRect().top,
+        height: hero.getBoundingClientRect().height,
+      };
+    })()`);
+    assert.equal(before.progress, 0);
+    assert.ok(after.progress > 0 && after.progress < 1, "Hero scroll progress did not update");
+    assert.equal(after.height, before.height, "Hero depth must not change layout height");
+    assert.ok(Math.abs((after.top - before.top) + 240) <= 1, "Hero depth must not shift the section layout box");
+  });
+  await check("major below-fold groups reveal once and stay visible", async () => {
+    await load();
+    await delay(180);
+    assert.ok(await evaluate("document.querySelectorAll('[data-scroll-reveal]').length >= 8"), "Major section reveals are missing");
+    assert.ok(await evaluate("document.querySelector('#hostiles [data-scroll-reveal]') !== null"), "Enemy Forces reveal is missing");
+    assert.ok(await evaluate("document.querySelector('#download [data-scroll-reveal]') !== null"), "Download reveal is missing");
+    await evaluate("document.querySelector('#download [data-scroll-reveal]').scrollIntoView({block:'center',behavior:'instant'})");
+    await waitFor(() => evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity === '1'"), "Download content did not reveal");
+    await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+    await delay(180);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity"), "1");
+  });
   await viewport(390, 844, true);
   await evaluate("window.scrollTo({top:0,behavior:'instant'})");
   await delay(300);
@@ -567,6 +637,9 @@ try {
     assert.equal(await evaluate("document.getAnimations().filter(a=>a.playState==='running').length"), 0);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1100, y: 450 });
     assert.equal(await evaluate("getComputedStyle(document.querySelector('main > div')).getPropertyValue('--pointer-x').trim()"), "0");
+    await evaluate("window.scrollTo({top:240,behavior:'instant'})");
+    await delay(120);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-hero-depth]')).getPropertyValue('--hero-scroll-progress').trim()"), "0");
     await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
     assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-boss-reveal]').parentElement).opacity"), "1");
   });

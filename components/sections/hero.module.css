@@ -54,6 +54,9 @@
 .copy {
   position: relative;
   z-index: 3;
+  opacity: calc(1 - var(--hero-scroll-progress) * .24);
+  transform: translateY(calc(var(--hero-scroll-progress) * -18px));
+  will-change: opacity, transform;
 }
 
 .eyebrow {
@@ -157,7 +160,10 @@
   inset: 7%;
   border: 1px solid #78c5eb21;
   border-radius: 50%;
-  transform: translate(calc(var(--pointer-x) * 8px), calc(var(--pointer-y) * 8px));
+  transform: translate(
+    calc(var(--pointer-x) * 8px),
+    calc(var(--pointer-y) * 8px + var(--hero-scroll-progress) * 10px)
+  );
 }
 
 .target::before, .target::after {
@@ -459,7 +465,7 @@
     padding: 360px var(--gutter) 116px;
   }
   .environment {
-    transform: none;
+    transform: translateY(calc(var(--hero-scroll-progress) * 10px));
   }
   .map {
     object-position: 45% 30%;
@@ -520,19 +526,21 @@
   }
   .visual {
     position: absolute;
-    width: min(88vw, 460px);
-    top: 104px;
-    right: 1%;
+    width: min(76vw, 420px);
+    top: 108px;
+    left: 50%;
+    right: auto;
     margin: 0;
     z-index: 1;
     opacity: .88;
+    translate: -50% 0;
   }
   .aircraft {
-    transform: rotate(23deg);
+    transform: rotate(16deg);
     filter: drop-shadow(-12px 12px 18px #0008);
   }
   .aircraftDepth {
-    transform: none;
+    transform: translateY(calc(var(--hero-scroll-progress) * 18px));
   }
   .target {
     inset: 10%;
@@ -566,6 +574,13 @@
   }
   .unitCaption {
     display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .visual {
+    width: min(76vw, 320px);
+    top: 112px;
   }
 }
 
@@ -637,5 +652,9 @@
   }
   .target, .machineLabelLine {
     transition: none;
+  }
+  .copy, .environment, .target, .aircraftDepth {
+    opacity: 1;
+    transform: none;
   }
 }

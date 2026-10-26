@@ -68,6 +68,10 @@
   min-width: 0;
 }
 
+.galleryReveal {
+  min-width: 0;
+}
+
 .gallery:focus-visible {
   outline-offset: -2px;
 }

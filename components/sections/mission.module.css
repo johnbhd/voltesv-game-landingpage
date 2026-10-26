@@ -1,5 +1,5 @@
 .mission { position: relative; isolation: isolate; background: #08090e; overflow: clip; }
-.image { position: absolute; inset: 0 0 0 38%; z-index: -3; opacity: .6; }.imageReveal { width: 100%; height: 100%; }.image img { object-fit: cover; object-position: center 45%; filter: saturate(.5); }
+.image { position: absolute; inset: 0 0 0 38%; z-index: -3; opacity: .6; }.imageReveal { position: relative; width: 100%; height: 100%; }.image img { object-fit: cover; object-position: center 45%; filter: saturate(.5); }
 .wash { position: absolute; inset: 0; z-index: -2; background: linear-gradient(90deg, #08090e 16%, #08090ed0 45%, #08090e77), linear-gradient(0deg, #08090e, transparent 60%, #08090e88); }
 .content { max-width: 1600px; margin: auto; padding: 55px var(--gutter) 35px; }
 .sectionTop { display: flex; align-items: center; justify-content: space-between; gap: 20px; font: 11px var(--font-mono); letter-spacing: .1em; }

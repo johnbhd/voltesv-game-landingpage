@@ -23,7 +23,7 @@ export function HeroSection() {
       alt: "",
       width: 1254,
       height: 1254,
-      sizes: "(max-width: 768px) 90vw, 58vw",
+      sizes: "(max-width: 768px) 78vw, 58vw",
     });
     const image = new window.Image();
     if (props.sizes) {
@@ -77,7 +77,7 @@ export function HeroSection() {
               BUILT FOR THE FIGHT
             </p>
           </div>
-          <div className={styles.visual}>
+          <div className={styles.visual} data-hero-visual>
             <div className={styles.target} aria-hidden="true">
               <span className={styles.targetInner} />
               <span className={styles.targetCross} />
@@ -96,7 +96,7 @@ export function HeroSection() {
                       alt=""
                       width={1254}
                       height={1254}
-                      sizes="(max-width: 768px) 90vw, 58vw"
+                      sizes="(max-width: 768px) 78vw, 58vw"
                       className={styles.aircraft}
                     />
                   </div>
@@ -116,9 +116,10 @@ export function HeroSection() {
                       alt={machine.artwork.alt}
                       width={1254}
                       height={1254}
-                      sizes="(max-width: 768px) 90vw, 58vw"
+                      sizes="(max-width: 768px) 78vw, 58vw"
                       preload={machine.id === "crewzer"}
                       className={styles.aircraft}
+                      data-hero-artwork
                       onError={() => setFailedArtwork(machine.id)}
                     />
                   )}

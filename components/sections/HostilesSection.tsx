@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { enemies } from "@/data/hostiles";
+import { Reveal } from "@/components/effects/Reveal";
 import { Arrow } from "@/components/ui/Arrow";
 import styles from "./hostiles.module.css";
 
@@ -52,120 +53,124 @@ export function HostilesSection() {
     <section id="hostiles" className={styles.hostiles} aria-labelledby="hostiles-title">
       <div className={styles.grid} aria-hidden="true" />
       <div className={styles.inner}>
-        <header className={styles.heading}>
-          <p className={styles.eyebrow}>
-            <span /> ENEMY INTELLIGENCE <span>{"// 004"}</span>
-          </p>
-          <div className={styles.headingRow}>
-            <h2 id="hostiles-title">
-              ENEMY{" "}<br />
-              <span>FORCES</span>
-            </h2>
-            <p>
-              Identify the machines standing between the Voltes team and Earth’s
-              survival.
+        <Reveal kind="clip">
+          <header className={styles.heading}>
+            <p className={styles.eyebrow}>
+              <span /> ENEMY INTELLIGENCE <span>{"// 004"}</span>
             </p>
-          </div>
-        </header>
+            <div className={styles.headingRow}>
+              <h2 id="hostiles-title">
+                ENEMY{" "}<br />
+                <span>FORCES</span>
+              </h2>
+              <p>
+                Identify the machines standing between the Voltes team and Earth’s
+                survival.
+              </p>
+            </div>
+          </header>
+        </Reveal>
 
-        <div id="hostile-scanner" className={styles.scanner}>
-          <div className={styles.scanWindow} data-hostile-stage>
-            <div className={styles.reticle} aria-hidden="true" />
-            <div className={styles.scanLine} aria-hidden="true" />
-            <div className={styles.artworkStack}>
-              {enemies.map((enemy, index) => {
-                const active = index === activeIndex;
-                const leaving = index === previousIndex;
+        <Reveal kind="rise" delay={80} className={styles.scannerReveal}>
+          <div id="hostile-scanner" className={styles.scanner}>
+            <div className={styles.scanWindow} data-hostile-stage>
+              <div className={styles.reticle} aria-hidden="true" />
+              <div className={styles.scanLine} aria-hidden="true" />
+              <div className={styles.artworkStack}>
+                {enemies.map((enemy, index) => {
+                  const active = index === activeIndex;
+                  const leaving = index === previousIndex;
 
-                return (
-                  <div
+                  return (
+                    <div
+                      key={enemy.id}
+                      className={styles.hostileArtwork}
+                      data-hostile-art={enemy.id}
+                      data-active={active}
+                      data-leaving={leaving}
+                      aria-hidden={!active}
+                    >
+                      {failedImages.has(enemy.id) ? (
+                        <p className={styles.unavailable}>ARTWORK UNAVAILABLE</p>
+                      ) : (
+                        <Image
+                          src={enemy.artwork.src}
+                          alt={active ? enemy.artwork.alt : ""}
+                          width={enemy.artwork.width}
+                          height={enemy.artwork.height}
+                          sizes="(max-width: 768px) calc(100vw - 48px), 58vw"
+                          onError={() => markFailed(enemy.id)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className={styles.scanStatus}>
+                TARGET LOCKED <span>●</span>
+              </p>
+            </div>
+
+            <div className={styles.dossier}>
+              <div
+                id="hostile-status"
+                className={styles.identity}
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <p>HOSTILE // {activeEnemy.number}</p>
+                <h3 id="hostile-name">{activeEnemy.name}</h3>
+                <span>{activeEnemy.number} / {String(enemies.length).padStart(2, "0")}</span>
+              </div>
+
+              <div className={styles.selectors} aria-label="Select a hostile unit">
+                {enemies.map((enemy, index) => (
+                  <button
                     key={enemy.id}
-                    className={styles.hostileArtwork}
-                    data-hostile-art={enemy.id}
-                    data-active={active}
-                    data-leaving={leaving}
-                    aria-hidden={!active}
+                    type="button"
+                    className={styles.selector}
+                    data-enemy-selector={enemy.id}
+                    aria-pressed={index === activeIndex}
+                    aria-label={`Select ${enemy.name}`}
+                    onClick={() => selectEnemy(index)}
                   >
-                    {failedImages.has(enemy.id) ? (
-                      <p className={styles.unavailable}>ARTWORK UNAVAILABLE</p>
-                    ) : (
+                    <span className={styles.selectorNumber}>{enemy.number}</span>
+                    <span className={styles.thumbnail} aria-hidden="true">
                       <Image
                         src={enemy.artwork.src}
-                        alt={active ? enemy.artwork.alt : ""}
-                        width={enemy.artwork.width}
-                        height={enemy.artwork.height}
-                        sizes="(max-width: 768px) calc(100vw - 48px), 58vw"
-                        onError={() => markFailed(enemy.id)}
+                        alt=""
+                        width={96}
+                        height={96}
+                        sizes="72px"
                       />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <p className={styles.scanStatus}>
-              TARGET LOCKED <span>●</span>
-            </p>
-          </div>
+                    </span>
+                    <span className={styles.selectorName}>{enemy.name}</span>
+                    <span className={styles.selectorMark} aria-hidden="true" />
+                  </button>
+                ))}
+              </div>
 
-          <div className={styles.dossier}>
-            <div
-              id="hostile-status"
-              className={styles.identity}
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              <p>HOSTILE // {activeEnemy.number}</p>
-              <h3 id="hostile-name">{activeEnemy.name}</h3>
-              <span>{activeEnemy.number} / {String(enemies.length).padStart(2, "0")}</span>
-            </div>
-
-            <div className={styles.selectors} aria-label="Select a hostile unit">
-              {enemies.map((enemy, index) => (
+              <nav className={styles.controls} aria-label="Hostile database navigation">
                 <button
-                  key={enemy.id}
                   type="button"
-                  className={styles.selector}
-                  data-enemy-selector={enemy.id}
-                  aria-pressed={index === activeIndex}
-                  aria-label={`Select ${enemy.name}`}
-                  onClick={() => selectEnemy(index)}
+                  aria-label={`Previous enemy: ${previousEnemy.name}`}
+                  onClick={() => selectEnemy(activeIndex - 1)}
                 >
-                  <span className={styles.selectorNumber}>{enemy.number}</span>
-                  <span className={styles.thumbnail} aria-hidden="true">
-                    <Image
-                      src={enemy.artwork.src}
-                      alt=""
-                      width={96}
-                      height={96}
-                      sizes="72px"
-                    />
-                  </span>
-                  <span className={styles.selectorName}>{enemy.name}</span>
-                  <span className={styles.selectorMark} aria-hidden="true" />
+                  <Arrow direction="left" />
+                  <span><small>PREVIOUS</small>{previousEnemy.name}</span>
                 </button>
-              ))}
+                <button
+                  type="button"
+                  aria-label={`Next enemy: ${nextEnemy.name}`}
+                  onClick={() => selectEnemy(activeIndex + 1)}
+                >
+                  <span><small>NEXT</small>{nextEnemy.name}</span>
+                  <Arrow direction="right" />
+                </button>
+              </nav>
             </div>
-
-            <nav className={styles.controls} aria-label="Hostile database navigation">
-              <button
-                type="button"
-                aria-label={`Previous enemy: ${previousEnemy.name}`}
-                onClick={() => selectEnemy(activeIndex - 1)}
-              >
-                <Arrow direction="left" />
-                <span><small>PREVIOUS</small>{previousEnemy.name}</span>
-              </button>
-              <button
-                type="button"
-                aria-label={`Next enemy: ${nextEnemy.name}`}
-                onClick={() => selectEnemy(activeIndex + 1)}
-              >
-                <span><small>NEXT</small>{nextEnemy.name}</span>
-                <Arrow direction="right" />
-              </button>
-            </nav>
           </div>
-        </div>
+        </Reveal>
 
         <footer className={styles.footer}>
           <span>BOAZANIAN FORCES / ARCHIVE ACCESS</span>

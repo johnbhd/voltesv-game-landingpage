@@ -77,6 +77,10 @@
   background: #070a11d9;
 }
 
+.scannerReveal {
+  min-width: 0;
+}
+
 .scanWindow {
   position: relative;
   display: grid;
