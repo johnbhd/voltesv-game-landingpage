@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import sharp from "sharp";
 import { machines } from "../data/machines.ts";
 import { environments } from "../data/site.ts";
+import { enemies, finalBoss } from "../data/hostiles.ts";
 
 await mkdir("public/images/game", { recursive: true });
 const assets = [
@@ -14,6 +15,8 @@ const assets = [
     machine.specialAbility.artwork,
   ]),
   ...Object.values(environments),
+  ...enemies.map((enemy) => enemy.artwork),
+  finalBoss.artwork,
 ];
 
 const manifest = [];

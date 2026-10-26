@@ -131,6 +131,91 @@ try {
   });
   await screenshot("desktop-hero");
   const desktopVitals = await evaluate("window.__vitals");
+  await check("hostile scanner maps seven sprites and stays manual with cyclic navigation", async () => {
+    assert.equal(await evaluate("document.querySelector('#hostiles')?.previousElementSibling.id"), "pilots");
+    assert.equal(await evaluate("document.querySelector('#boss')?.previousElementSibling.id"), "hostiles");
+    assert.equal(await evaluate("document.querySelector('#download')?.previousElementSibling.id"), "boss");
+    assert.equal(await evaluate("document.querySelectorAll('[data-enemy-selector]').length"), 7);
+    await evaluate("document.querySelector('#hostiles').scrollIntoView({behavior:'instant'})");
+
+    for (const [index, id, name] of [
+      [0, "scout-drone", "Scout Drone"],
+      [1, "scout-drone-02", "Scout Drone Variant 02"],
+      [2, "hornet-fighter", "Hornet Fighter"],
+      [3, "heavy-bomber", "Heavy Bomber"],
+      [4, "crab-tank", "Crab Tank"],
+      [5, "boazanian-spike", "Boazanian Spike"],
+      [6, "elite-commander", "Elite Commander"],
+    ]) {
+      await evaluate(`document.querySelector('[data-enemy-selector="${id}"]').click()`);
+      await waitFor(() => evaluate(`document.querySelector('[data-hostile-art="${id}"] img').complete && document.querySelector('[data-hostile-art="${id}"] img').naturalWidth>0`), "Hostile image did not load: " + id);
+      assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), name);
+      assert.match(await evaluate("document.querySelector('#hostile-status').textContent"), new RegExp(String(index + 1).padStart(2, "0") + " / 07"));
+      assert.equal(await evaluate("document.querySelectorAll('[data-enemy-selector][aria-pressed=true]').length"), 1);
+    }
+
+    await evaluate("document.querySelector('[aria-label^=\"Next enemy\"]').click()");
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Scout Drone");
+    await evaluate("document.querySelector('[aria-label^=\"Previous enemy\"]').click()");
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Elite Commander");
+    await delay(5500);
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Elite Commander");
+    await screenshot("desktop-hostiles");
+  });
+  await check("hostile selectors support keyboard input and rapid changes without layout jumps", async () => {
+    await evaluate("document.querySelector('[data-enemy-selector=\"heavy-bomber\"]').focus()");
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", text: "\r", unmodifiedText: "\r", windowsVirtualKeyCode: 13 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Heavy Bomber");
+    await evaluate("document.querySelector('[data-enemy-selector=\"crab-tank\"]').focus()");
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: " ", code: "Space", text: " ", unmodifiedText: " ", windowsVirtualKeyCode: 32 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: " ", code: "Space", windowsVirtualKeyCode: 32 });
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Crab Tank");
+    const before = await evaluate("document.querySelector('#hostile-scanner').getBoundingClientRect().height");
+    await evaluate("document.querySelectorAll('[data-enemy-selector]').forEach(button=>button.click())");
+    await delay(450);
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Elite Commander");
+    assert.equal(await evaluate("document.querySelector('#hostile-scanner').getBoundingClientRect().height"), before);
+    assert.equal(await evaluate("document.querySelectorAll('[data-hostile-art][data-active=true]').length"), 1);
+  });
+  await check("boss artwork reveals once with a complete contained silhouette", async () => {
+    const revealSelector = "#boss [data-boss-reveal]";
+    assert.ok(Number(await evaluate(`getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity`)) < 1, "Boss reveal should begin visually subdued while offscreen");
+    await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
+    await delay(1100);
+    await waitFor(() => evaluate("document.querySelector('#boss img').complete && document.querySelector('#boss img').naturalWidth>0"), "Boss image did not load");
+    const bossText = await evaluate("document.querySelector('#boss').textContent");
+    assert.match(bossText, /WARNING/);
+    assert.match(bossText, /FINAL ENCOUNTER/);
+    assert.match(bossText, /SKULL.*FORTRESS/s);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#boss img')).objectFit"), "contain");
+    assert.equal(await evaluate(`getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity`), "1");
+    await evaluate("document.querySelector('#hostiles').scrollIntoView({behavior:'instant'})");
+    await delay(150);
+    await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
+    assert.equal(await evaluate(`getComputedStyle(document.querySelector('${revealSelector}').parentElement).opacity`), "1");
+    await screenshot("desktop-boss");
+  });
+  await check("hostile scanner and boss remain usable on mobile", async () => {
+    await viewport(390, 844, true);
+    await evaluate("document.querySelector('#hostiles').scrollIntoView({behavior:'instant'})");
+    const documentWidth = await evaluate("document.documentElement.scrollWidth");
+    assert.ok(documentWidth <= 391, "Hostile scanner must not create page overflow");
+    assert.ok(await evaluate("document.querySelector('#hostiles [aria-label=\"Select a hostile unit\"]').scrollWidth > document.querySelector('#hostiles [aria-label=\"Select a hostile unit\"]').clientWidth"), "Mobile selectors should scroll horizontally");
+    await evaluate("document.querySelector('#hostiles [aria-label=\"Select a hostile unit\"]').scrollTo({left:10000,behavior:'instant'})");
+    await delay(100);
+    assert.ok(await evaluate("document.querySelector('#hostiles [aria-label=\"Select a hostile unit\"]').scrollLeft > 0"));
+    await evaluate("document.querySelector('[data-enemy-selector=\"elite-commander\"]').click()");
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Elite Commander");
+    await screenshot("mobile-hostiles");
+    await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
+    await delay(1000);
+    const bossBounds = await evaluate("(()=>{const r=document.querySelector('#boss img').getBoundingClientRect();return {left:r.left,right:r.right,width:r.width}})()");
+    assert.ok(bossBounds.left >= -1 && bossBounds.right <= 391, "Boss horns must remain inside the mobile viewport");
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#boss img')).objectFit"), "contain");
+    await screenshot("mobile-boss");
+    await viewport(1440);
+  });
   await check("full-body pilots follow machines without repeating their introductions", async () => {
     assert.equal(await evaluate("document.querySelector('#pilots')?.previousElementSibling.id"), "machines");
     assert.match(await evaluate("document.querySelector('#pilots h2').textContent"), /FIVE PILOTS.*ONE MISSION/s);
@@ -386,6 +471,29 @@ try {
     await send("Network.setBlockedURLs", { urls: [] });
     await send("Network.setCacheDisabled", { cacheDisabled: false });
   });
+  await check("missing hostile artwork keeps the selected dossier usable", async () => {
+    await send("Network.setCacheDisabled", { cacheDisabled: true });
+    await send("Network.setBlockedURLs", { urls: ["*hostile-heavy-bomber*"] });
+    await load();
+    await evaluate("document.querySelector('[data-enemy-selector=\"heavy-bomber\"]').click();document.querySelector('#hostiles').scrollIntoView({behavior:'instant'})");
+    await waitFor(() => evaluate("document.querySelector('[data-hostile-art=\"heavy-bomber\"]').textContent.includes('ARTWORK UNAVAILABLE')"), "Missing hostile image fallback did not appear");
+    assert.equal(await evaluate("document.querySelector('#hostile-name').textContent"), "Heavy Bomber");
+    assert.equal(await evaluate("document.querySelector('[data-enemy-selector=\"heavy-bomber\"]').getAttribute('aria-pressed')"), "true");
+    await send("Network.setBlockedURLs", { urls: [] });
+    await send("Network.setCacheDisabled", { cacheDisabled: false });
+  });
+  await check("missing boss artwork preserves the final encounter", async () => {
+    await send("Network.setCacheDisabled", { cacheDisabled: true });
+    await send("Network.setBlockedURLs", { urls: ["*boss-skull-fortress*"] });
+    await load();
+    await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
+    await waitFor(() => evaluate("document.querySelector('#boss').textContent.includes('FORTRESS ARTWORK UNAVAILABLE')"), "Missing boss image fallback did not appear");
+    assert.match(await evaluate("document.querySelector('#boss').textContent"), /FINAL ENCOUNTER/);
+    assert.match(await evaluate("document.querySelector('#boss').textContent"), /SKULL.*FORTRESS/s);
+    assert.ok(await evaluate("document.querySelector('#boss [data-boss-artwork]').getBoundingClientRect().height > 300"), "Boss fallback must preserve its image stage");
+    await send("Network.setBlockedURLs", { urls: [] });
+    await send("Network.setCacheDisabled", { cacheDisabled: false });
+  });
   await check("reduced motion rotates the hero artwork without animation or parallax", async () => {
     await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
     await viewport(1440);
@@ -398,12 +506,16 @@ try {
     assert.equal(await evaluate("document.getAnimations().filter(a=>a.playState==='running').length"), 0);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1100, y: 450 });
     assert.equal(await evaluate("getComputedStyle(document.querySelector('main > div')).getPropertyValue('--pointer-x').trim()"), "0");
+    await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-boss-reveal]').parentElement).opacity"), "1");
   });
   await check("content remains readable without JavaScript", async () => {
     await send("Emulation.setScriptExecutionDisabled", { value: true });
     await load();
     assert.equal(await evaluate("getComputedStyle(document.querySelector('h1')).opacity"), "1");
     assert.match(await evaluate("document.querySelector('#machine-panel [data-active=true] h3').textContent"), /Crewzer/);
+    assert.match(await evaluate("document.querySelector('#hostiles').textContent"), /HOSTILE.*DATABASE.*Scout Drone/s);
+    assert.match(await evaluate("document.querySelector('#boss').textContent"), /FINAL ENCOUNTER/);
     await send("Emulation.setScriptExecutionDisabled", { value: false });
   });
   await check("no uncaught runtime or console errors", async () => assert.deepEqual(runtimeErrors, []));

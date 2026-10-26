@@ -5,6 +5,47 @@ import test from "node:test";
 import sharp from "sharp";
 import { machines, machineAt } from "../data/machines.ts";
 import { releaseAction, release } from "../data/site.ts";
+import { enemies, finalBoss } from "../data/hostiles.ts";
+
+test("hostile roster maps all seven original sprites without invented statistics", () => {
+  const sources = [
+    "scout_drone.png",
+    "scout_drone2.png",
+    "hornet_figther.png",
+    "heavy_bomber.png",
+    "crab_tank.png",
+    "boizanian_spike.png",
+    "elite_commander.png",
+  ];
+
+  assert.equal(enemies.length, 7);
+  assert.equal(new Set(enemies.map((enemy) => enemy.id)).size, 7);
+  enemies.forEach((enemy, index) => {
+    assert.equal(enemy.number, String(index + 1).padStart(2, "0"));
+    assert.ok(enemy.artwork.source.endsWith(sources[index]));
+    assert.ok(existsSync(resolve("public", enemy.artwork.source)));
+    assert.ok(enemy.artwork.alt.length > 0);
+    for (const field of ["hp", "damage", "threat", "stats"]) {
+      assert.ok(!(field in enemy), "Unverified hostile statistics must not be published");
+    }
+  });
+  assert.equal(enemies[2].name, "Hornet Fighter");
+  assert.equal(enemies[5].name, "Boazanian Spike");
+  assert.equal(finalBoss.name, "Skull Fortress");
+  assert.ok(finalBoss.artwork.source.endsWith("fortress_battleship_boss.png"));
+});
+
+test("hostile derivatives preserve transparency, aspect ratios and native resolution", async () => {
+  for (const { artwork } of [...enemies, finalBoss]) {
+    const source = await sharp(resolve("public", artwork.source)).metadata();
+    const derivative = await sharp(resolve("public", artwork.src.slice(1))).metadata();
+    assert.equal(artwork.width, source.width);
+    assert.equal(artwork.height, source.height);
+    assert.equal(derivative.hasAlpha, true);
+    assert.ok(derivative.width! <= source.width!);
+    assert.ok(Math.abs(derivative.width! / derivative.height! - artwork.width / artwork.height) < 0.003);
+  }
+});
 
 test("every selectable machine has its real supplied artwork and anime pilot", () => {
   assert.equal(machines.length, 5);

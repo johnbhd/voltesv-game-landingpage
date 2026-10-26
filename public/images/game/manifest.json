@@ -266,5 +266,85 @@
     "outputWidth": 941,
     "outputHeight": 1672,
     "bytes": 281334
+  },
+  {
+    "source": "img-assets/enemy assets/scout_drone.png",
+    "src": "/images/game/hostile-scout-drone.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Scout Drone with swept wings, twin cannons and red armor accents",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 127636
+  },
+  {
+    "source": "img-assets/enemy assets/scout_drone2.png",
+    "src": "/images/game/hostile-scout-drone-02.webp",
+    "width": 1464,
+    "height": 1075,
+    "alt": "Second Scout Drone variant with a broad wingspan and four forward cannons",
+    "outputWidth": 1254,
+    "outputHeight": 921,
+    "bytes": 125990
+  },
+  {
+    "source": "img-assets/enemy assets/hornet_figther.png",
+    "src": "/images/game/hostile-hornet-fighter.webp",
+    "width": 1229,
+    "height": 1280,
+    "alt": "Hornet Fighter with pointed navy wings and red illuminated panels",
+    "outputWidth": 1229,
+    "outputHeight": 1280,
+    "bytes": 164454
+  },
+  {
+    "source": "img-assets/enemy assets/heavy_bomber.png",
+    "src": "/images/game/hostile-heavy-bomber.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Heavy Bomber with dark armor, twin cannons and shoulder-mounted launchers",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 201622
+  },
+  {
+    "source": "img-assets/enemy assets/crab_tank.png",
+    "src": "/images/game/hostile-crab-tank.webp",
+    "width": 1536,
+    "height": 1024,
+    "alt": "Crab Tank with wide armored claws and twin forward cannons",
+    "outputWidth": 1254,
+    "outputHeight": 836,
+    "bytes": 125756
+  },
+  {
+    "source": "img-assets/enemy assets/boizanian_spike.png",
+    "src": "/images/game/hostile-boazanian-spike.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Boazanian Spike, a circular armored machine with a red core and metal spikes",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 241760
+  },
+  {
+    "source": "img-assets/enemy assets/elite_commander.png",
+    "src": "/images/game/hostile-elite-commander.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Elite Commander with horned black armor, gold markings and red cannons",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 141914
+  },
+  {
+    "source": "img-assets/finalboss/fortress_battleship_boss/fortress_battleship_boss.png",
+    "src": "/images/game/boss-skull-fortress.webp",
+    "width": 1254,
+    "height": 1254,
+    "alt": "Skull Fortress, a towering skull-shaped battleship with curved horns and red eyes",
+    "outputWidth": 1254,
+    "outputHeight": 1254,
+    "bytes": 270164
   }
 ]

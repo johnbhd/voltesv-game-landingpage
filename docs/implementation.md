@@ -64,3 +64,18 @@ Architecture: thin server-composed `app/page.tsx`; `components/layout`, `ui`, `s
   Desktop/mobile screenshots and an independent code review are complete.
 - Developed on main; the user requested committing and pushing this completed section.
 - See [artwork prompts, sources and verification](pilot-artwork.md).
+
+## Hostile Database and Skull Fortress
+
+- Added a manual seven-enemy scanner after Pilots using every supplied enemy
+  sprite, with direct selectors, named cyclic controls and stable transitions.
+- Kept the presentation factual: names and original artwork only, with no
+  invented HP, damage or threat ratings.
+- Added the Skull Fortress final encounter using the supplied transparent boss
+  artwork, restrained red lighting and a one-time reveal that respects reduced
+  motion and remains readable without JavaScript.
+- Extended the image pipeline with eight optimized WebP assets and retained all
+  original source images.
+- Build, lint, TypeScript, eleven content/clock tests and thirty-one Chromium checks
+  pass. Desktop and mobile screenshots confirm contained artwork and no overflow.
+- See [hostile encounter decisions and verification](hostile-encounters.md).

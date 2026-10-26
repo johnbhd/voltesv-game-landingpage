@@ -21,7 +21,7 @@ npm run build
 
 ## Visual checkpoint
 
-The first checkpoint includes the header, layered hero, mission transition and five-machine selector. The approved follow-up adds a full-body pilot roster. A small availability section keeps the release/gameplay anchors useful. Full gameplay, skill, enemy and boss scenes remain planned.
+The first checkpoint includes the header, layered hero, mission transition and five-machine selector. Approved follow-ups add a full-body pilot roster, a manual seven-enemy scanner and the Skull Fortress final encounter. A small availability section keeps the release/gameplay anchors useful. Full gameplay and any separate skill scene remain planned.
 
 Machine/pilot/artwork relationships live in data/machines.ts. Navigation, environments and release state live in data/site.ts. Leave the release in preview until a real APK URL and confirmed version are supplied. The preview has no fabricated stats, gameplay captures, version or GitHub link.
 
@@ -64,3 +64,14 @@ The roster shows all five figures on large screens and uses a focusable horizont
 scroll region on smaller screens. Source PNGs and optimized WebP images are saved
 under `public/images/pilots/`; `npm run assets:prepare` regenerates the derivatives.
 See [artwork references, prompts and verification](docs/pilot-artwork.md).
+
+## Hostile encounters
+
+The Hostile Database presents all seven supplied enemy sprites through a manual,
+keyboard-accessible scanner with cyclic Previous/Next controls. It remains on the
+selected target until the visitor changes it. Skull Fortress follows as a contained
+cinematic reveal using the supplied boss artwork and restrained red lighting.
+
+No enemy statistics are shown because the repository has no confirmed values.
+Both scenes keep their content visible with reduced motion or disabled JavaScript.
+See [hostile encounter decisions](docs/hostile-encounters.md).
