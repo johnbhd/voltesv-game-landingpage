@@ -7,7 +7,7 @@ export const release: Release = { status: "preview" };
 export function releaseAction(value: Release): { label: string; href: string | null; version: string | null } {
   return value.status === "available"
     ? { label: "DOWNLOAD APK", href: value.apkUrl, version: value.version }
-    : { label: "APK COMING SOON", href: null, version: null };
+    : { label: "DOWNLOAD NOW", href: null, version: null };
 }
 
 export const environments = {

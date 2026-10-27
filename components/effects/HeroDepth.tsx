@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { useReducedMotion } from "./motion-preference";
 import styles from "./effects.module.css";
 
 export function HeroDepth({ children }: { children: ReactNode }) {
   const root = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const element = root.current;
@@ -41,14 +39,8 @@ export function HeroDepth({ children }: { children: ReactNode }) {
       element.style.setProperty("--pointer-y", "0");
     };
 
-    const resetMotion = () => {
-      resetPointer();
-      element.style.setProperty("--hero-scroll", "0px");
-      element.style.setProperty("--hero-scroll-progress", "0");
-    };
-
     const move = (event: PointerEvent) => {
-      if (reducedMotion || !pointer.matches || event.pointerType === "touch") {
+      if (!pointer.matches || event.pointerType === "touch") {
         return;
       }
 
@@ -69,11 +61,6 @@ export function HeroDepth({ children }: { children: ReactNode }) {
 
     const updateScroll = () => {
       scrollFrame = 0;
-      if (reducedMotion) {
-        resetMotion();
-        return;
-      }
-
       const bounds = element.getBoundingClientRect();
       if (bounds.bottom < 0 || bounds.top > window.innerHeight) {
         return;
@@ -92,11 +79,6 @@ export function HeroDepth({ children }: { children: ReactNode }) {
     };
 
     const preferencesChanged = () => {
-      if (reducedMotion) {
-        resetMotion();
-        return;
-      }
-
       if (!pointer.matches) {
         resetPointer();
       }
@@ -121,7 +103,7 @@ export function HeroDepth({ children }: { children: ReactNode }) {
       window.removeEventListener("resize", scheduleScroll);
       pointer.removeEventListener("change", preferencesChanged);
     };
-  }, [reducedMotion]);
+  }, []);
 
   return (
     <div ref={root} className={styles.depth} data-hero-depth>

@@ -44,7 +44,7 @@ export function SiteHeader() {
         <nav className={`${styles.navigation} ${open ? styles.open : ""}`} id="site-navigation" aria-label="Main navigation">
           {navigation.map((item, index) => <a key={item.href} href={item.href} onClick={() => setOpen(false)}><span className={styles.navIndex}>0{index + 1}</span>{item.label}</a>)}
         </nav>
-        <a className={styles.headerCta} href="#download" onClick={() => setOpen(false)}>Android release <Arrow /></a>
+        <a className={styles.headerCta} href="#download" onClick={() => setOpen(false)}>Download APK <Arrow /></a>
         <button ref={toggle} className={styles.menuToggle} aria-controls="site-navigation" aria-expanded={open} aria-label={open ? "Close navigation" : "Open navigation"} onClick={() => setOpen(!open)}>
           <span /><span />
         </button>

@@ -150,8 +150,8 @@
 .visual {
   position: relative;
   width: 104%;
-  max-width: min(720px, 68svh);
-  margin-left: -10%;
+  max-width: min(660px, 62svh);
+  margin-left: 8%;
   aspect-ratio: 1;
   z-index: 1;
 }
@@ -218,12 +218,48 @@
   height: 100%;
 }
 
+.fireControl {
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: crosshair;
+}
+
+.fireControl:focus-visible {
+  outline: 2px solid var(--hero-accent);
+  outline-offset: 8px;
+}
+
 .aircraft {
   width: 100%;
   height: 100%;
   object-fit: contain;
   transform: rotate(16deg);
   filter: drop-shadow(-18px 25px 24px #000a);
+}
+
+.projectileField {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.projectile {
+  --projectile-angle: 16deg;
+  position: absolute;
+  top: 44%;
+  left: 46%;
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px var(--hero-accent));
+  animation: projectileFire 1.25s cubic-bezier(.16, .8, .3, 1) both;
 }
 
 .machineLabel {
@@ -446,6 +482,20 @@
   }
 }
 
+@keyframes projectileFire {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--projectile-angle)) translate(-50%, -50%) scale(.35);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--projectile-angle)) translate(-50%, -130svh) scale(1.15);
+  }
+}
+
 @media (min-width: 1600px) {
   .heroInner {
     min-height: 980px;
@@ -460,8 +510,8 @@
     grid-template-columns: 56% 44%;
   }
   .visual {
-    width: 112%;
-    margin-left: -18%;
+    width: 90%;
+    margin-left: 1%;
   }
   .title {
     font-size: 8vw;
@@ -566,6 +616,12 @@
   .aircraft {
     transform: rotate(16deg);
     filter: drop-shadow(-12px 12px 18px #0008);
+  }
+
+  .projectile {
+    top: 43%;
+    width: 170px;
+    height: 170px;
   }
   .aircraftDepth {
     transform: translateY(calc(var(--hero-scroll-progress) * 36px));

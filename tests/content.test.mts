@@ -112,7 +112,7 @@ test("each machine maps its matching projectile and special ability artwork", ()
 
 test("preview releases never expose a fabricated download or version", () => {
   assert.deepEqual(releaseAction(release), {
-    label: "APK COMING SOON",
+    label: "DOWNLOAD NOW",
     href: null,
     version: null,
   });

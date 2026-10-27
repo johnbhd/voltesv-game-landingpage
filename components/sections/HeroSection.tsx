@@ -1,7 +1,12 @@
 "use client";
 
 import Image, { getImageProps } from "next/image";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { environments } from "@/data/site";
 import { machineAt } from "@/data/machines";
 import { HeroDepth } from "@/components/effects/HeroDepth";
@@ -10,11 +15,63 @@ import { Arrow } from "@/components/ui/Arrow";
 import { useHeroRotation } from "@/components/effects/useHeroRotation";
 import styles from "./hero.module.css";
 
+type HeroProjectile = {
+  id: number;
+  machineId: string;
+  artwork: {
+    src: string;
+    alt: string;
+  };
+};
+
 export function HeroSection() {
   const root = useRef<HTMLElement>(null);
   const selection = useHeroRotation(root);
   const machine = machineAt(selection.active);
   const [failedArtwork, setFailedArtwork] = useState<string | null>(null);
+  const [projectiles, setProjectiles] = useState<HeroProjectile[]>([]);
+  const projectileId = useRef(0);
+  const projectileTimers = useRef(new Map<number, number>());
+  const lastFireAt = useRef(Number.NEGATIVE_INFINITY);
+
+  const removeProjectile = (id: number) => {
+    const timer = projectileTimers.current.get(id);
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+      projectileTimers.current.delete(id);
+    }
+    setProjectiles((current) => current.filter((projectile) => projectile.id !== id));
+  };
+
+  const fireWeapon = () => {
+    const now = window.performance.now();
+    if (now - lastFireAt.current < 1500) {
+      return;
+    }
+    lastFireAt.current = now;
+
+    const id = projectileId.current + 1;
+    projectileId.current = id;
+    setProjectiles((current) => [
+      ...current.slice(-3),
+      {
+        id,
+        machineId: machine.id,
+        artwork: machine.primaryWeapon.artwork,
+      },
+    ]);
+
+    const timer = window.setTimeout(() => {
+      projectileTimers.current.delete(id);
+      setProjectiles((current) => current.filter((projectile) => projectile.id !== id));
+    }, 2000);
+    projectileTimers.current.set(id, timer);
+  };
+
+  useEffect(() => () => {
+    projectileTimers.current.forEach((timer) => window.clearTimeout(timer));
+    projectileTimers.current.clear();
+  }, []);
 
   useEffect(() => {
     const next = machineAt(selection.active + 1);
@@ -67,7 +124,7 @@ export function HeroSection() {
               Take flight. Strike back. Defend our world.
             </p>
             <div className={styles.actions}>
-              <ActionLink href="#download">Android release</ActionLink>
+              <ActionLink href="#download">Download APK</ActionLink>
               <ActionLink href="#gameplay" secondary>View gameplay</ActionLink>
             </div>
             <p className={styles.platform}>
@@ -84,7 +141,7 @@ export function HeroSection() {
               <span className={styles.orbitText}>VOLT SYSTEMS / UNIT {machine.number}</span>
             </div>
             <div className={styles.aircraftDepth}>
-              <div className={styles.aircraftIntro}>
+              <div className={styles.aircraftIntro} data-hero-artwork-layer>
                 {selection.previous !== null && (
                   <div
                     key={`out-${selection.previous}`}
@@ -111,20 +168,45 @@ export function HeroSection() {
                       Artwork unavailable.
                     </p>
                   ) : (
-                    <Image
-                      src={machine.artwork.src}
-                      alt={machine.artwork.alt}
-                      width={1254}
-                      height={1254}
-                      sizes="(max-width: 768px) 70vw, (max-width: 1080px) 48vw, 50vw"
-                      preload={machine.id === "crewzer"}
-                      className={styles.aircraft}
-                      data-hero-artwork
-                      onError={() => setFailedArtwork(machine.id)}
-                    />
+                    <button
+                      type="button"
+                      className={styles.fireControl}
+                      aria-label={`Fire ${machine.primaryWeapon.name} from ${machine.name}`}
+                      data-hero-fire
+                      onClick={fireWeapon}
+                    >
+                      <Image
+                        src={machine.artwork.src}
+                        alt={machine.artwork.alt}
+                        width={1254}
+                        height={1254}
+                        sizes="(max-width: 768px) 70vw, (max-width: 1080px) 48vw, 50vw"
+                        preload={machine.id === "crewzer"}
+                        className={styles.aircraft}
+                        data-hero-artwork
+                        onError={() => setFailedArtwork(machine.id)}
+                      />
+                    </button>
                   )}
                 </div>
               </div>
+            </div>
+            <div className={styles.projectileField} aria-live="polite">
+              {projectiles.map((projectile) => (
+                <Image
+                  key={projectile.id}
+                  src={projectile.artwork.src}
+                  alt=""
+                  width={256}
+                  height={256}
+                  sizes="(max-width: 768px) 170px, 220px"
+                  className={styles.projectile}
+                  data-hero-projectile
+                  data-projectile-machine={projectile.machineId}
+                  aria-label={projectile.artwork.alt}
+                  onAnimationEnd={() => removeProjectile(projectile.id)}
+                />
+              ))}
             </div>
             <div className={styles.machineLabel}>
               <span className={styles.machineLabelLine} />

@@ -27,7 +27,7 @@
 
 * { box-sizing: border-box; }
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   scroll-padding-top: 105px;
   scrollbar-gutter: stable;
   scrollbar-color: #b99538 #080d16;

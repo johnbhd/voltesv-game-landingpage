@@ -2,7 +2,6 @@
 
 import { useEffect, useState, type RefObject } from "react";
 import { machines } from "@/data/machines";
-import { isMotionReduced } from "./motion-preference";
 import { createRotationClock } from "./rotation-clock";
 
 export function useHeroRotation(root: RefObject<HTMLElement | null>) {
@@ -26,7 +25,7 @@ export function useHeroRotation(root: RefObject<HTMLElement | null>) {
       advance: () => {
         setSelection((value) => ({
           active: (value.active + 1) % machines.length,
-          previous: isMotionReduced() ? null : value.active,
+          previous: value.active,
         }));
       },
     });

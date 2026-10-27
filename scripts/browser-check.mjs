@@ -117,29 +117,21 @@ try {
     assert.equal(await evaluate("getComputedStyle(document.querySelector('h1').closest('section')).position"), "relative");
     assert.ok(await evaluate("document.querySelector('h1').className.length>0"), "CSS Module class mappings are missing");
   });
-  await check("site animation control overrides system reduced motion and persists", async () => {
+  await check("site animations stay permanently enabled without a control", async () => {
     await send("Emulation.setEmulatedMedia", {
       features: [{ name: "prefers-reduced-motion", value: "reduce" }],
     });
-    await evaluate("localStorage.removeItem('voltes-motion')");
+    await evaluate("localStorage.setItem('voltes-motion', 'reduce')");
     await load();
 
     assert.equal(
       await evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"),
       true,
     );
-    assert.equal(await evaluate("document.documentElement.dataset.motion"), "reduce");
-    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]').getAttribute('aria-pressed')"), "false");
-
-    await evaluate("document.querySelector('[data-motion-toggle]').click()");
-    await waitFor(
-      () => evaluate("document.documentElement.dataset.motion === 'full'"),
-      "Animation override did not enable motion",
-    );
+    assert.equal(await evaluate("document.documentElement.dataset.motion"), "full");
+    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]')"), null);
     await delay(180);
 
-    assert.equal(await evaluate("localStorage.getItem('voltes-motion')"), "full");
-    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]').getAttribute('aria-pressed')"), "true");
     assert.notEqual(await evaluate("getComputedStyle(document.querySelector('h1')).animationName"), "none");
 
     await evaluate("window.scrollTo({top:240,behavior:'instant'});window.dispatchEvent(new Event('scroll'))");
@@ -157,28 +149,15 @@ try {
     );
     await evaluate("document.querySelector('#download [data-scroll-reveal]').scrollIntoView({block:'center',behavior:'instant'})");
     await delay(180);
-    const revealOpacity = Number(await evaluate(
-      "getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity",
-    ));
-    assert.ok(
-      revealOpacity > 0 && revealOpacity < 1,
-      "Explicitly enabled section reveal was not visibly animating",
+    assert.notEqual(
+      await evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).transitionDuration"),
+      "0s",
+      "Explicitly enabled section reveal has no motion transition",
     );
     await waitFor(
       () => evaluate("document.querySelector('#download [data-scroll-reveal]').dataset.revealState === 'visible'"),
       "Section reveal did not complete",
     );
-
-    await load();
-    assert.equal(await evaluate("document.documentElement.dataset.motion"), "full");
-    assert.equal(await evaluate("document.querySelector('[data-motion-toggle]').getAttribute('aria-pressed')"), "true");
-
-    await evaluate("document.querySelector('[data-motion-toggle]').click()");
-    await waitFor(
-      () => evaluate("document.documentElement.dataset.motion === 'reduce'"),
-      "Animation override did not disable motion",
-    );
-    assert.equal(await evaluate("document.getAnimations().filter(animation => animation.playState === 'running').length"), 0);
 
     await evaluate("localStorage.removeItem('voltes-motion')");
     await send("Emulation.setEmulatedMedia", {
@@ -192,11 +171,156 @@ try {
   await check("game identity, real art, valid anchors and preview release", async () => {
     assert.match(await evaluate("document.querySelector('h1').textContent"), /VOLTES VSTRIKE/);
     assert.equal(await evaluate("document.querySelectorAll('h1').length"), 1);
+    assert.ok(await evaluate("[...document.querySelectorAll('link[rel~=icon]')].some(link => link.href.includes('/images/game/social.webp'))"), "Social artwork favicon is missing");
+    assert.equal(
+      await evaluate("[...document.querySelectorAll('a[href=\"#download\"]')].filter(link => /DOWNLOAD APK/i.test(link.textContent)).length >= 2"),
+      true,
+    );
     assert.equal(await evaluate("[...document.querySelectorAll('a[href^=\"#\"]')].every(a=>document.getElementById(a.hash.slice(1)))"), true);
     assert.equal(await evaluate("document.querySelector('#download button').disabled"), true);
+    assert.match(await evaluate("document.querySelector('#download button').textContent"), /DOWNLOAD NOW/i);
     assert.equal(await evaluate("document.querySelectorAll('a[href$=\".apk\"]').length"), 0);
     assert.match(await evaluate("document.querySelector('#gameplay').textContent"), /COMING SOON/);
     assert.equal(await evaluate("document.querySelector('h1').closest('section').querySelector('img[alt]').complete"), true);
+  });
+  await check("hero fires the active machine projectile on click", async () => {
+    await load();
+    assert.equal(await evaluate("document.querySelectorAll('[data-hero-projectile]').length"), 0);
+
+    await evaluate("document.querySelector('[data-hero-fire]').click()");
+    await waitFor(
+      () => evaluate("document.querySelector('[data-hero-projectile]')?.dataset.projectileMachine === 'crewzer'"),
+      "Crewzer did not fire its mapped projectile",
+    );
+    assert.ok(await evaluate("decodeURIComponent(document.querySelector('[data-hero-projectile]').src).includes('weapon-crewzer.webp')"));
+    await waitFor(
+      () => evaluate("document.querySelector('[data-hero-projectile]').complete && document.querySelector('[data-hero-projectile]').naturalWidth > 0"),
+      "Desktop projectile source did not load",
+    );
+    assert.ok(await evaluate("document.querySelector('[data-hero-projectile]').getAnimations().some(animation => animation.playState === 'running')"));
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-hero-projectile]')).width"), "220px");
+    const desktopProjectileOrigin = JSON.parse(await evaluate(`JSON.stringify({
+      left: parseFloat(getComputedStyle(document.querySelector('[data-hero-projectile]')).left),
+      fieldWidth: document.querySelector('[data-hero-projectile]').parentElement.getBoundingClientRect().width,
+    })`));
+    assert.ok(
+      Math.abs(desktopProjectileOrigin.left / desktopProjectileOrigin.fieldWidth - .46) < .005,
+      `Desktop projectile origin is not centered at 46%: ${JSON.stringify(desktopProjectileOrigin)}`,
+    );
+    const desktopProjectileSource = await evaluate(`JSON.stringify({
+      sizes: document.querySelector('[data-hero-projectile]').sizes,
+      naturalWidth: document.querySelector('[data-hero-projectile]').naturalWidth,
+      currentSrc: document.querySelector('[data-hero-projectile]').currentSrc,
+    })`);
+    assert.ok(
+      JSON.parse(desktopProjectileSource).naturalWidth >= 220,
+      `Desktop projectile source is too small for its rendered size: ${desktopProjectileSource}`,
+    );
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-hero-projectile]')).animationDuration"), "1.25s");
+    const launchStart = await evaluate("document.querySelector('[data-hero-projectile]').getBoundingClientRect().toJSON()");
+    await delay(180);
+    const launchMid = await evaluate("document.querySelector('[data-hero-projectile]').getBoundingClientRect().toJSON()");
+    assert.ok(launchMid.top < launchStart.top - 20, "Projectile should travel quickly toward the top of the screen");
+    assert.ok(launchMid.left > launchStart.left, "Projectile should follow the machine's rotated firing direction");
+    await evaluate("document.querySelector('[data-hero-projectile]').dispatchEvent(new AnimationEvent('animationend', { bubbles: true }))");
+    await delay(80);
+    assert.equal(await evaluate("document.querySelectorAll('[data-hero-projectile]').length"), 0);
+
+    await delay(1400);
+    await evaluate("document.querySelector('[data-hero-fire]').click();document.querySelector('[data-hero-fire]').click()");
+    await delay(100);
+    assert.equal(await evaluate("document.querySelectorAll('[data-hero-projectile]').length"), 1);
+    await delay(1500);
+    await evaluate("document.querySelector('[data-hero-fire]').click()");
+    await waitFor(
+      () => evaluate("document.querySelectorAll('[data-hero-projectile]').length === 1"),
+      "Projectile did not fire after the 1.5 second cooldown",
+    );
+    await delay(620);
+
+    await load();
+    await waitFor(
+      () => evaluate("document.querySelector('[data-hero-machine]').dataset.heroMachine === 'bomber'"),
+      "Hero did not rotate to Bomber before the projectile mapping check",
+      6500,
+    );
+    await evaluate("document.querySelector('[data-hero-fire]').click()");
+    await waitFor(
+      () => evaluate("[...document.querySelectorAll('[data-hero-projectile]')].some(projectile => projectile.dataset.projectileMachine === 'bomber')"),
+      "Bomber did not fire its mapped projectile",
+    );
+    assert.ok(await evaluate("[...document.querySelectorAll('[data-hero-projectile]')].some(projectile => decodeURIComponent(projectile.src).includes('weapon-bomber.webp'))"));
+
+    await viewport(390, 844, true);
+    await load();
+    await evaluate("document.querySelector('[data-hero-fire]').click()");
+    await waitFor(
+      () => evaluate("document.querySelector('[data-hero-projectile]') !== null"),
+      "Mobile hero did not fire a projectile",
+    );
+    await waitFor(
+      () => evaluate("document.querySelector('[data-hero-projectile]').complete && document.querySelector('[data-hero-projectile]').naturalWidth > 0"),
+      "Mobile projectile source did not load",
+    );
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-hero-projectile]')).width"), "170px");
+    const mobileProjectileOrigin = JSON.parse(await evaluate(`JSON.stringify({
+      left: parseFloat(getComputedStyle(document.querySelector('[data-hero-projectile]')).left),
+      fieldWidth: document.querySelector('[data-hero-projectile]').parentElement.getBoundingClientRect().width,
+    })`));
+    assert.ok(
+      Math.abs(mobileProjectileOrigin.left / mobileProjectileOrigin.fieldWidth - .46) < .005,
+      `Mobile projectile origin is not centered at 46%: ${JSON.stringify(mobileProjectileOrigin)}`,
+    );
+    assert.ok(
+      await evaluate("document.querySelector('[data-hero-projectile]').naturalWidth >= 170"),
+      "Mobile projectile source is too small for its rendered size",
+    );
+    await viewport(1430, 900, false);
+    await load();
+  });
+  await check("same-page links use cancellable cinematic scrolling", async () => {
+    await viewport(1430, 900, false);
+    await load();
+    assert.equal(await evaluate("getComputedStyle(document.documentElement).scrollBehavior"), "auto");
+    assert.equal(await evaluate("document.querySelector('.skip-link').hasAttribute('data-scroll-instant')"), true);
+
+    const machinesDestination = Number(await evaluate(`Math.min(
+      document.querySelector('#machines').getBoundingClientRect().top + scrollY
+        - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop),
+      document.documentElement.scrollHeight - innerHeight
+    )`));
+    const startedAt = Number(await evaluate("performance.now()"));
+    await evaluate("document.querySelector('#site-navigation a[href=\"#machines\"]').click()");
+    await delay(300);
+    const midwayY = Number(await evaluate("scrollY"));
+    assert.ok(midwayY > 20 && midwayY < machinesDestination - 20, `Scroll did not visibly animate: ${midwayY}/${machinesDestination}`);
+    assert.equal(await evaluate("location.hash"), "#machines");
+    await waitFor(
+      () => evaluate("Math.abs(document.querySelector('#machines').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4"),
+      "Animated scroll did not align Machines below the fixed header",
+      1800,
+    );
+    const elapsed = Number(await evaluate("performance.now()")) - startedAt;
+    assert.ok(elapsed >= 1000 && elapsed < 1700, `Animated scroll duration was not approximately 1100ms: ${elapsed}ms`);
+
+    await evaluate("document.querySelector('a[href=\"#download\"]').click()");
+    await delay(250);
+    await evaluate("document.querySelector('a[href=\"#mission\"]').click()");
+    await waitFor(
+      () => evaluate("location.hash === '#mission' && Math.abs(document.querySelector('#mission').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4"),
+      "A second anchor did not replace the active scroll",
+      1800,
+    );
+
+    await evaluate("document.querySelector('a[href=\"#download\"]').click()");
+    await delay(220);
+    await evaluate("window.dispatchEvent(new WheelEvent('wheel'))");
+    const interruptedY = Number(await evaluate("scrollY"));
+    await delay(400);
+    assert.ok(Math.abs(Number(await evaluate("scrollY")) - interruptedY) < 3, "Manual input did not cancel animated scrolling");
+
+    await evaluate("document.querySelector('footer a[href=\"#top\"]').click()");
+    await waitFor(() => evaluate("scrollY < 3 && location.hash === '#top'"), "Back-to-top link did not animate to the page origin", 1800);
   });
   await check("fill images inside reveal wrappers keep a positioning context", async () => {
     assert.equal(
@@ -440,21 +564,6 @@ try {
     await delay(10500);
     assert.equal(await evaluate("document.querySelector('[role=tab][aria-selected=true]').id"), "tab-crewzer");
   });
-  await check("runtime reduced motion keeps rotating with instant image changes", async () => {
-    await load();
-    await waitFor(() => evaluate("document.querySelector('[data-hero-machine]').dataset.heroMachine==='bomber'"), "Hero did not rotate before changing preference", 6500);
-    await send("Emulation.setEmulatedMedia", {
-      features: [{ name: "prefers-reduced-motion", value: "reduce" }],
-    });
-    await delay(5300);
-    assert.equal(await evaluate("document.querySelector('[data-hero-machine]').dataset.heroMachine"), "panzer");
-    assert.ok(await evaluate("decodeURIComponent(document.querySelector('[data-hero-machine] img[alt]:not([alt=\"\"])').src).includes('volt-panzer.webp')"));
-    assert.equal(await evaluate("document.getAnimations().filter(animation=>animation.playState==='running').length"), 0);
-    await send("Emulation.setEmulatedMedia", {
-      features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
-    });
-    await waitFor(() => evaluate("document.querySelector('[data-hero-machine]').dataset.heroMachine==='frigate'"), "Hero did not continue after changing preference", 6500);
-  });
   await check("content artwork and descriptions follow all five machine selections", async () => {
     for (const [machine, weapon, skill, pilot] of [
       ["crewzer", "Energy Blast", "Crewzer Overdrive", "Steve Armstrong"],
@@ -570,9 +679,13 @@ try {
       assert.ok(bounds, `Hero artwork hooks are missing at ${width}px`);
       if (width <= 768) {
         assert.ok(Math.abs(bounds.visualCenter - width / 2) <= 5, `Hero visual is not centered at ${width}px`);
+      } else if (width < 1200) {
+        assert.ok(bounds.visualLeft >= width * .55, `Hero visual needs more separation from the title at ${width}px: ${JSON.stringify(bounds)}`);
+      } else {
+        assert.ok(bounds.visualLeft >= width * .54, `Hero visual needs more separation from the title at ${width}px: ${JSON.stringify(bounds)}`);
       }
-      assert.ok(bounds.artworkLeft >= 4, `Hero artwork is clipped on the left at ${width}px`);
-      assert.ok(bounds.artworkRight <= width - 4, `Hero artwork is clipped on the right at ${width}px`);
+      assert.ok(bounds.artworkLeft >= 4, `Hero artwork is clipped on the left at ${width}px: ${JSON.stringify(bounds)}`);
+      assert.ok(bounds.artworkRight <= width - 4, `Hero artwork is clipped on the right at ${width}px: ${JSON.stringify(bounds)}`);
     }
   });
   await check("hero depth responds to scroll without moving the layout box", async () => {
@@ -616,8 +729,11 @@ try {
     assert.equal(await evaluate("document.querySelector('#download [data-scroll-reveal]').dataset.revealState"), "waiting");
     await evaluate("document.querySelector('#download [data-scroll-reveal]').scrollIntoView({block:'center',behavior:'instant'})");
     await delay(180);
-    const intermediateOpacity = Number(await evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity"));
-    assert.ok(intermediateOpacity > 0 && intermediateOpacity < .98, "Reveal should visibly animate into view");
+    assert.notEqual(
+      await evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).transitionDuration"),
+      "0s",
+      "Reveal should have a visible transition into view",
+    );
     await waitFor(() => evaluate("getComputedStyle(document.querySelector('#download [data-scroll-reveal]')).opacity === '1'"), "Download content did not reveal");
     await evaluate("window.scrollTo({top:0,behavior:'instant'})");
     await delay(180);
@@ -633,7 +749,7 @@ try {
     await delay(220);
     assert.ok(await evaluate(`document.querySelector('[data-hero-artwork]').complete
       && document.querySelector('[data-hero-artwork]').naturalWidth > 0`));
-    assert.ok(await evaluate(`document.querySelector('[data-hero-artwork]').parentElement.parentElement
+    assert.ok(await evaluate(`document.querySelector('[data-hero-artwork-layer]')
       .getAnimations().some(animation => animation.playState === 'running')`), "Machine entrance is not visibly running");
     await screenshot("desktop-hero-intro");
     await delay(1500);
@@ -734,24 +850,6 @@ try {
     assert.ok(await evaluate("document.querySelector('#boss [data-boss-artwork]').getBoundingClientRect().height > 300"), "Boss fallback must preserve its image stage");
     await send("Network.setBlockedURLs", { urls: [] });
     await send("Network.setCacheDisabled", { cacheDisabled: false });
-  });
-  await check("reduced motion rotates the hero artwork without animation or parallax", async () => {
-    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-    await viewport(1440);
-    await load();
-    await delay(5300);
-    assert.equal(await evaluate("document.querySelector('[data-hero-machine]').dataset.heroMachine"), "bomber");
-    assert.ok(await evaluate("decodeURIComponent(document.querySelector('[data-hero-machine] img[alt]:not([alt=\"\"])').src).includes('volt-bomber.webp')"));
-    await evaluate("document.querySelector('#tab-panzer').click()");
-    assert.equal(await evaluate("document.querySelector('#machine-panel [data-active=true]').dataset.machineDetails"), "panzer");
-    assert.equal(await evaluate("document.getAnimations().filter(a=>a.playState==='running').length"), 0);
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1100, y: 450 });
-    assert.equal(await evaluate("getComputedStyle(document.querySelector('main > div')).getPropertyValue('--pointer-x').trim()"), "0");
-    await evaluate("window.scrollTo({top:240,behavior:'instant'})");
-    await delay(120);
-    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-hero-depth]')).getPropertyValue('--hero-scroll-progress').trim()"), "0");
-    await evaluate("document.querySelector('#boss').scrollIntoView({behavior:'instant'})");
-    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-boss-reveal]').parentElement).opacity"), "1");
   });
   await check("content remains readable without JavaScript", async () => {
     await send("Emulation.setScriptExecutionDisabled", { value: true });
