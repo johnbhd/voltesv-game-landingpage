@@ -1,13 +1,22 @@
-export type Release =
-  | { status: "preview" }
-  | { status: "available"; apkUrl: string; version: string };
+export type Release = {
+  apkUrl: string;
+  version?: string;
+};
 
-export const release: Release = { status: "preview" };
+export const release: Release = {
+  apkUrl: "https://github.com/johnbhd/voltesv-game-landingpage/releases/download/android/voltesv.apk",
+};
 
-export function releaseAction(value: Release): { label: string; href: string | null; version: string | null } {
-  return value.status === "available"
-    ? { label: "DOWNLOAD APK", href: value.apkUrl, version: value.version }
-    : { label: "DOWNLOAD NOW", href: null, version: null };
+export function releaseAction(value: Release): {
+  label: string;
+  href: string;
+  version: string | null;
+} {
+  return {
+    label: "DOWNLOAD NOW",
+    href: value.apkUrl,
+    version: value.version ?? null,
+  };
 }
 
 export const environments = {

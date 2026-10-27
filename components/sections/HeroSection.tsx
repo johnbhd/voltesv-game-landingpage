@@ -7,7 +7,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { environments } from "@/data/site";
+import { environments, release, releaseAction } from "@/data/site";
 import { machineAt } from "@/data/machines";
 import { HeroDepth } from "@/components/effects/HeroDepth";
 import { ActionLink } from "@/components/ui/ActionLink";
@@ -25,6 +25,7 @@ type HeroProjectile = {
 };
 
 export function HeroSection() {
+  const downloadAction = releaseAction(release);
   const root = useRef<HTMLElement>(null);
   const selection = useHeroRotation(root);
   const machine = machineAt(selection.active);
@@ -45,7 +46,7 @@ export function HeroSection() {
 
   const fireWeapon = () => {
     const now = window.performance.now();
-    if (now - lastFireAt.current < 1500) {
+    if (now - lastFireAt.current < 500) {
       return;
     }
     lastFireAt.current = now;
@@ -124,7 +125,12 @@ export function HeroSection() {
               Take flight. Strike back. Defend our world.
             </p>
             <div className={styles.actions}>
-              <ActionLink href="#download">Download APK</ActionLink>
+              <ActionLink
+                href={downloadAction.href}
+                download
+              >
+                Download APK
+              </ActionLink>
               <ActionLink href="#gameplay" secondary>View gameplay</ActionLink>
             </div>
             <p className={styles.platform}>

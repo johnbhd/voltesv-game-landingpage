@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Arrow } from "@/components/ui/Arrow";
 import { machines } from "@/data/machines";
 import styles from "./pilots.module.css";
@@ -132,7 +132,14 @@ export function PilotRoster() {
               className={styles.rosterItem}
               data-unit={machine.number}
             >
-              <article id={"pilot-" + machine.id} className={styles.pilot}>
+              <article
+                id={`pilot-${machine.id}`}
+                className={styles.pilot}
+                tabIndex={0}
+                aria-labelledby={`pilot-name-${machine.id}`}
+                data-active={index === activeIndex}
+                style={{ "--pilot-accent": machine.accent } as CSSProperties}
+              >
                 <p className={styles.unit}>PILOT // {machine.number}</p>
                 <div className={styles.figure}>
                   <Image
@@ -145,7 +152,7 @@ export function PilotRoster() {
                   />
                 </div>
                 <div className={styles.introduction}>
-                  <h3>{machine.pilot.name}</h3>
+                  <h3 id={`pilot-name-${machine.id}`}>{machine.pilot.name}</h3>
                   <p className={styles.assignment}>{machine.name}</p>
                   <p className={styles.biography} data-pilot-intro>
                     {machine.pilot.description}

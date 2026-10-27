@@ -6,6 +6,25 @@ import sharp from "sharp";
 import { machines, machineAt } from "../data/machines.ts";
 import { releaseAction, release } from "../data/site.ts";
 import { enemies, finalBoss } from "../data/hostiles.ts";
+import { gameplayScenes } from "../data/gameplay.ts";
+
+test("gameplay scenes use real captures with matching intrinsic dimensions", async () => {
+  assert.deepEqual(gameplayScenes.map((scene) => scene.id), ["combat", "overdrive", "boss"]);
+  assert.deepEqual(gameplayScenes.map((scene) => scene.image.src), [
+    "/images/gameplay/gameplay.png",
+    "/images/gameplay/skills.png",
+    "/images/gameplay/finalboss.png",
+  ]);
+
+  for (const scene of gameplayScenes) {
+    const metadata = await sharp(resolve("public", scene.image.src.slice(1))).metadata();
+    assert.equal(scene.image.width, metadata.width);
+    assert.equal(scene.image.height, metadata.height);
+    assert.ok(scene.image.alt.length > 0);
+    assert.ok(scene.description.length > 0);
+    assert.ok(scene.features.length > 0);
+  }
+});
 
 test("hostile roster maps all seven original sprites without invented statistics", () => {
   const sources = [
@@ -110,18 +129,18 @@ test("each machine maps its matching projectile and special ability artwork", ()
   });
 });
 
-test("preview releases never expose a fabricated download or version", () => {
-  assert.deepEqual(releaseAction(release), {
+test("an available release uses the supplied artifact URL and confirmed version", () => {
+  assert.deepEqual(releaseAction({ apkUrl: "/releases/strike.apk", version: "1.2.0" }), {
     label: "DOWNLOAD NOW",
-    href: null,
-    version: null,
+    href: "/releases/strike.apk",
+    version: "1.2.0",
   });
 });
 
-test("an available release uses the supplied artifact URL and confirmed version", () => {
-  assert.deepEqual(releaseAction({ status: "available", apkUrl: "/releases/strike.apk", version: "1.2.0" }), {
-    label: "DOWNLOAD APK",
-    href: "/releases/strike.apk",
-    version: "1.2.0",
+test("published APK uses the supplied GitHub link without inventing a version", () => {
+  assert.deepEqual(releaseAction(release), {
+    label: "DOWNLOAD NOW",
+    href: "https://github.com/johnbhd/voltesv-game-landingpage/releases/download/android/voltesv.apk",
+    version: null,
   });
 });

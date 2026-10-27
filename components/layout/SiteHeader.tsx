@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { navigation } from "@/data/site";
+import { navigation, release, releaseAction } from "@/data/site";
 import { Arrow } from "@/components/ui/Arrow";
 import styles from "./layout.module.css";
 
 export function SiteHeader() {
+  const downloadAction = releaseAction(release);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
@@ -44,7 +45,14 @@ export function SiteHeader() {
         <nav className={`${styles.navigation} ${open ? styles.open : ""}`} id="site-navigation" aria-label="Main navigation">
           {navigation.map((item, index) => <a key={item.href} href={item.href} onClick={() => setOpen(false)}><span className={styles.navIndex}>0{index + 1}</span>{item.label}</a>)}
         </nav>
-        <a className={styles.headerCta} href="#download" onClick={() => setOpen(false)}>Download APK <Arrow /></a>
+        <a
+          className={styles.headerCta}
+          href={downloadAction.href}
+          download
+          onClick={() => setOpen(false)}
+        >
+          Download APK <Arrow />
+        </a>
         <button ref={toggle} className={styles.menuToggle} aria-controls="site-navigation" aria-expanded={open} aria-label={open ? "Close navigation" : "Open navigation"} onClick={() => setOpen(!open)}>
           <span /><span />
         </button>

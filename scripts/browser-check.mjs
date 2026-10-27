@@ -168,20 +168,250 @@ try {
   await check("body copy follows the readable 16px minimum", async () => {
     assert.ok(await evaluate("parseFloat(getComputedStyle([...document.querySelector('h1').closest('section').querySelectorAll('p')].find(p=>p.textContent.includes('Take flight.'))).fontSize)>=16"), "Hero body copy is smaller than the specified 16px minimum");
   });
-  await check("game identity, real art, valid anchors and preview release", async () => {
+  await check("game identity, real art, valid anchors and supplied APK download", async () => {
     assert.match(await evaluate("document.querySelector('h1').textContent"), /VOLTES VSTRIKE/);
     assert.equal(await evaluate("document.querySelectorAll('h1').length"), 1);
     assert.ok(await evaluate("[...document.querySelectorAll('link[rel~=icon]')].some(link => link.href.includes('/images/game/social.webp'))"), "Social artwork favicon is missing");
     assert.equal(
-      await evaluate("[...document.querySelectorAll('a[href=\"#download\"]')].filter(link => /DOWNLOAD APK/i.test(link.textContent)).length >= 2"),
+      await evaluate("[...document.querySelectorAll('a[href$=\".apk\"]')].filter(link => /DOWNLOAD APK/i.test(link.textContent)).length >= 2"),
       true,
     );
     assert.equal(await evaluate("[...document.querySelectorAll('a[href^=\"#\"]')].every(a=>document.getElementById(a.hash.slice(1)))"), true);
-    assert.equal(await evaluate("document.querySelector('#download button').disabled"), true);
-    assert.match(await evaluate("document.querySelector('#download button').textContent"), /DOWNLOAD NOW/i);
-    assert.equal(await evaluate("document.querySelectorAll('a[href$=\".apk\"]').length"), 0);
-    assert.match(await evaluate("document.querySelector('#gameplay').textContent"), /COMING SOON/);
+    assert.equal(await evaluate("document.querySelector('#download button')"), null);
+    assert.match(await evaluate("document.querySelector('#download a[download]').textContent"), /DOWNLOAD NOW/i);
+    assert.equal(await evaluate("document.querySelectorAll('a[href$=\".apk\"]').length"), 3);
+    assert.equal(await evaluate("[...document.querySelectorAll('a[href$=\".apk\"]')].every(link => link.href === 'https://github.com/johnbhd/voltesv-game-landingpage/releases/download/android/voltesv.apk' && link.hasAttribute('download'))"), true);
+    assert.equal(await evaluate("document.querySelector('#release-status').textContent.trim()"), "ANDROID / APK DOWNLOAD");
+    assert.equal(await evaluate("document.querySelectorAll('#gameplay').length"), 1);
+    assert.equal(await evaluate("document.querySelector('#pilots').nextElementSibling.id"), "gameplay");
+    assert.match(await evaluate("document.querySelector('#gameplay').textContent"), /TAKE FLIGHT.*TAKE CONTROL/s);
     assert.equal(await evaluate("document.querySelector('h1').closest('section').querySelector('img[alt]').complete"), true);
+    assert.equal(await evaluate("/COMING SOON|Real game captures will be added|▷/.test(document.body.innerText)"), false);
+    assert.match(await evaluate("document.querySelector('#download').textContent"), /Download Voltes V Strike for Android and join the fight/);
+  });
+  await check("download CTAs respond to hover focus and real clicks at desktop and mobile sizes", async () => {
+    await load();
+    await evaluate(`
+      window.__downloadIntents = [];
+      window.__downloadGuard = (event) => {
+        const link = event.target.closest('a[download]');
+        if (link) {
+          event.preventDefault();
+          window.__downloadIntents.push(link.href);
+        }
+      };
+      document.addEventListener('click', window.__downloadGuard);
+    `);
+    let expectedClicks = 0;
+    for (const width of [360, 390, 768, 800, 1024, 1440]) {
+      await viewport(width, 900, width <= 768);
+      assert.ok(await evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), `Header overflows at ${width}px`);
+      for (const selector of ["header a[download]", "section[aria-labelledby=hero-title] a[download]", "#download a[download]"]) {
+        await evaluate(`document.activeElement?.blur();document.querySelector('${selector}').scrollIntoView({behavior:'instant',block:'center'})`);
+        await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+        await delay(300);
+        await waitFor(
+          () => evaluate(`(() => {
+            const reveal = document.querySelector('${selector}').closest('[data-scroll-reveal]');
+            return !reveal || (reveal.dataset.revealState === 'visible' && reveal.getAnimations().every(animation => animation.playState !== 'running'));
+          })()`),
+          "Download CTA did not finish revealing",
+        );
+        const before = await evaluate(`getComputedStyle(document.querySelector('${selector}')).backgroundColor`);
+        const target = await evaluate(`(() => {
+          const link = document.querySelector('${selector}');
+          const bounds = link.getBoundingClientRect();
+          const x = bounds.left + bounds.width / 2;
+          const y = bounds.top + bounds.height / 2;
+          const hit = document.elementFromPoint(x, y);
+          return {
+            x, y,
+            height: bounds.height,
+            unobstructed: hit === link || link.contains(hit),
+            contained: bounds.left >= 0 && bounds.right <= innerWidth,
+          };
+        })()`);
+        assert.equal(target.unobstructed, true, `${selector} is obstructed at ${width}px`);
+        assert.equal(target.contained, true, `${selector} escapes the viewport at ${width}px`);
+        assert.ok(target.height >= 44);
+        await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: target.x, y: target.y });
+        await delay(250);
+        if (selector !== "section[aria-labelledby=hero-title] a[download]" && width > 768) {
+          assert.notEqual(await evaluate(`getComputedStyle(document.querySelector('${selector}')).backgroundColor`), before);
+        }
+        await send("Input.dispatchMouseEvent", { type: "mousePressed", button: "left", clickCount: 1, x: target.x, y: target.y });
+        await send("Input.dispatchMouseEvent", { type: "mouseReleased", button: "left", clickCount: 1, x: target.x, y: target.y });
+        expectedClicks += 1;
+        await waitFor(
+          () => evaluate(`window.__downloadIntents.length === ${expectedClicks}`),
+          `${selector} did not receive the real pointer click at ${width}px`,
+        );
+      }
+    }
+    assert.equal(await evaluate("window.__downloadIntents.every(url => url === 'https://github.com/johnbhd/voltesv-game-landingpage/releases/download/android/voltesv.apk')"), true);
+    await screenshot("desktop-download-hover");
+    await viewport(1440);
+    await evaluate("document.querySelector('header a').focus({preventScroll:true})");
+    const headerTabCount = await evaluate("document.querySelectorAll('#site-navigation a').length + 1");
+    for (let step = 0; step < headerTabCount; step += 1) {
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+    }
+    await delay(250);
+    assert.equal(await evaluate("document.activeElement === document.querySelector('header a[download]')"), true);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('header a[download]')).outlineStyle"), "solid");
+    await evaluate("document.removeEventListener('click', window.__downloadGuard)");
+    await load();
+  });
+  await check("gameplay tabs show matching real captures and advance every five seconds", async () => {
+    assert.equal(await evaluate("document.querySelector('#gameplay button[aria-label*=\"slideshow\"]')"), null);
+    await evaluate("document.querySelector('#gameplay').scrollIntoView({behavior:'instant',block:'start'})");
+    await waitFor(
+      () => evaluate("document.querySelector('[data-gameplay-image=combat] img').complete && document.querySelector('[data-gameplay-image=combat] img').naturalWidth > 0"),
+      "Initial gameplay screenshot did not load",
+    );
+    const before = await evaluate("document.querySelector('#gameplay').getBoundingClientRect().height");
+    for (const [scene, filename, copy] of [
+      ["overdrive", "skills.png", "enhanced firepower"],
+      ["boss", "finalboss.png", "Skull Fortress"],
+      ["combat", "gameplay.png", "score climbing"],
+    ]) {
+      await evaluate(`document.querySelector('#gameplay-tab-${scene}').click()`);
+      await delay(300);
+      assert.equal(await evaluate(`document.querySelector('#gameplay-tab-${scene}').getAttribute('aria-selected')`), "true");
+      await waitFor(
+        () => evaluate(`document.querySelector('[data-gameplay-image=${scene}] img').complete && document.querySelector('[data-gameplay-image=${scene}] img').naturalWidth > 0`),
+        `${scene} screenshot did not load`,
+      );
+      assert.ok(await evaluate(`decodeURIComponent(document.querySelector('[data-gameplay-image=${scene}] img').src).includes('${filename}')`));
+      assert.equal(await evaluate(`document.querySelector('[data-gameplay-image=${scene}]').dataset.active`), "true");
+      assert.ok(await evaluate(`document.querySelector('#gameplay-${scene}').textContent.includes('${copy}')`));
+      assert.ok(Math.abs(await evaluate("document.querySelector('#gameplay').getBoundingClientRect().height") - before) <= 1);
+    }
+    await delay(3500);
+    assert.equal(await evaluate("document.querySelector('#gameplay [aria-selected=true]').id"), "gameplay-tab-combat");
+    for (const scene of ["overdrive", "boss", "combat"]) {
+      await waitFor(
+        () => evaluate(`document.querySelector('#gameplay [aria-selected=true]').id === 'gameplay-tab-${scene}'`),
+        `Automatic gameplay rotation did not reach ${scene}`,
+        6000,
+      );
+      assert.equal(await evaluate(`document.querySelector('[data-gameplay-image=${scene}]').dataset.active`), "true");
+    }
+    await screenshot("desktop-gameplay");
+  });
+  await check("gameplay rotation follows the site's always-on motion setting even with system reduced motion", async () => {
+    await send("Emulation.setEmulatedMedia", {
+      features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+    });
+    await load();
+    await evaluate("document.querySelector('#gameplay').scrollIntoView({behavior:'instant',block:'start'})");
+    assert.equal(await evaluate("document.documentElement.dataset.motion"), "full");
+    assert.equal(await evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches"), true);
+    for (const scene of ["overdrive", "boss", "combat"]) {
+      await waitFor(
+        () => evaluate(`document.querySelector('#gameplay [aria-selected=true]').id === 'gameplay-tab-${scene}'`),
+        `Always-on Gameplay rotation stopped before ${scene} under system reduced motion`,
+        6000,
+      );
+    }
+    await send("Emulation.setEmulatedMedia", {
+      features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+    });
+  });
+  await check("gameplay rotation conserves timers offscreen and in hidden tabs", async () => {
+    const selected = () => evaluate("document.querySelector('#gameplay [aria-selected=true]').id");
+
+    await evaluate("document.querySelector('#top').scrollIntoView({behavior:'instant'})");
+    await delay(250);
+    const offscreenScene = await selected();
+    await delay(5200);
+    assert.equal(await selected(), offscreenScene);
+
+    await evaluate("document.querySelector('#gameplay').scrollIntoView({behavior:'instant',block:'start'})");
+    await evaluate("Object.defineProperty(document,'visibilityState',{configurable:true,value:'hidden'});document.dispatchEvent(new Event('visibilitychange'))");
+    const hiddenScene = await selected();
+    await delay(5200);
+    assert.equal(await selected(), hiddenScene);
+    await evaluate("delete document.visibilityState;document.dispatchEvent(new Event('visibilitychange'))");
+
+    await evaluate("document.querySelector('#gameplay-tab-combat').click()");
+  });
+  await check("gameplay tabs support keyboard focus and manual activation", async () => {
+    await evaluate("document.querySelector('#gameplay-tab-combat').focus({preventScroll:true})");
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight" });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowRight", code: "ArrowRight" });
+    assert.equal(await evaluate("document.activeElement.id"), "gameplay-tab-overdrive");
+    assert.equal(await evaluate("document.querySelector('#gameplay [aria-selected=true]').id"), "gameplay-tab-combat");
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", text: "\r", unmodifiedText: "\r", windowsVirtualKeyCode: 13 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
+    assert.equal(await evaluate("document.querySelector('#gameplay [aria-selected=true]').id"), "gameplay-tab-overdrive");
+    await waitFor(
+      () => evaluate("document.querySelector('#gameplay [aria-selected=true]').id === 'gameplay-tab-boss'"),
+      "Gameplay did not continue rotating while a tab had focus",
+      6000,
+    );
+    assert.equal(await evaluate("document.activeElement.id"), "gameplay-tab-overdrive");
+    for (const [key, expected] of [["End", "boss"], ["Home", "combat"], ["ArrowLeft", "boss"]]) {
+      await send("Input.dispatchKeyEvent", { type: "keyDown", key, code: key });
+      await send("Input.dispatchKeyEvent", { type: "keyUp", key, code: key });
+      assert.equal(await evaluate("document.activeElement.id"), `gameplay-tab-${expected}`);
+    }
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: " ", code: "Space", text: " ", unmodifiedText: " ", windowsVirtualKeyCode: 32 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: " ", code: "Space", windowsVirtualKeyCode: 32 });
+    assert.equal(await evaluate("document.querySelector('#gameplay [aria-selected=true]').id"), "gameplay-tab-boss");
+  });
+  await check("gameplay captures fit mobile and desktop without cropping or motion in reduced mode", async () => {
+    for (const width of [360, 390, 768, 1440]) {
+      await viewport(width, 900, width < 769);
+      await evaluate("document.querySelector('#gameplay').scrollIntoView({behavior:'instant',block:'start'})");
+      const dimensions = await evaluate(`(() => {
+        const image = document.querySelector('[data-gameplay-image=boss] img');
+        const frame = document.querySelector('[data-gameplay-stage]');
+        const bounds = image.getBoundingClientRect();
+        const stage = frame.getBoundingClientRect();
+        return {
+          overflow: document.documentElement.scrollWidth > innerWidth,
+          fit: getComputedStyle(image).objectFit,
+          contained: bounds.left >= stage.left && bounds.right <= stage.right && bounds.top >= stage.top && bounds.bottom <= stage.bottom,
+          smallestTarget: Math.min(...[...document.querySelectorAll('#gameplay [role=tab]')].map(tab => tab.getBoundingClientRect().height)),
+        };
+      })()`);
+      assert.equal(dimensions.overflow, false, `Page overflow at ${width}px`);
+      assert.equal(dimensions.fit, "contain");
+      assert.equal(dimensions.contained, true, `Screenshot escaped frame at ${width}px`);
+      assert.ok(dimensions.smallestTarget >= 44);
+      if (width === 390) await screenshot("mobile-gameplay");
+    }
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#gameplay-boss')).transitionDuration"), "0s");
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#gameplay [data-scroll-reveal]')).transitionDuration"), "0s");
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
+    await load();
+  });
+  await check("hero and header links reach the real gameplay section below the fixed header", async () => {
+    for (const source of [
+      "document.querySelector('h1').closest('section')",
+      "document.querySelector('#site-navigation')",
+    ]) {
+      await load();
+      await evaluate(`${source}.querySelector('a[href="#gameplay"]').click()`);
+      await waitFor(
+        () => evaluate(`location.hash === '#gameplay'
+          && document.activeElement?.id === 'gameplay'
+          && Math.abs(document.querySelector('#gameplay').getBoundingClientRect().top
+            - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4`),
+        "Gameplay link did not reach the new showcase below the header",
+        4000,
+      );
+      const initialScene = await evaluate("document.querySelector('#gameplay [aria-selected=true]').id");
+      await waitFor(
+        async () => await evaluate("document.querySelector('#gameplay [aria-selected=true]').id") !== initialScene,
+        "Gameplay rotation remained paused after navigation focused the section",
+        6000,
+      );
+    }
+    await load();
   });
   await check("hero fires the active machine projectile on click", async () => {
     await load();
@@ -230,11 +460,11 @@ try {
     await evaluate("document.querySelector('[data-hero-fire]').click();document.querySelector('[data-hero-fire]').click()");
     await delay(100);
     assert.equal(await evaluate("document.querySelectorAll('[data-hero-projectile]').length"), 1);
-    await delay(1500);
+    await delay(550);
     await evaluate("document.querySelector('[data-hero-fire]').click()");
     await waitFor(
-      () => evaluate("document.querySelectorAll('[data-hero-projectile]').length === 1"),
-      "Projectile did not fire after the 1.5 second cooldown",
+      () => evaluate("document.querySelectorAll('[data-hero-projectile]').length === 2"),
+      "Projectile did not fire after the 0.5 second cooldown",
     );
     await delay(620);
 
@@ -333,7 +563,7 @@ try {
       "Animated scroll did not align Machines below the fixed header",
     );
 
-    await evaluate("document.querySelector('a[href=\"#download\"]').click()");
+    await evaluate("document.querySelector('a[href=\"#hostiles\"]').click()");
     await delay(250);
     await evaluate("document.querySelector('a[href=\"#mission\"]').click()");
     await waitFor(
@@ -345,7 +575,7 @@ try {
     await evaluate("document.querySelector('footer a[href=\"#top\"]').click()");
     await waitFor(() => evaluate("scrollY < 3 && location.hash === '#top'"), "Back-to-top link did not animate to the page origin", 3500);
 
-    await evaluate("document.querySelector('a[href=\"#download\"]').click()");
+    await evaluate("document.querySelector('a[href=\"#hostiles\"]').click()");
     await delay(250);
     const skipStartedAt = Number(await evaluate("performance.now()"));
     await evaluate("document.querySelector('.skip-link').click()");
@@ -360,7 +590,7 @@ try {
       "The interrupted smooth scroll stole focus from the skip target",
     );
 
-    await evaluate("document.querySelector('a[href=\"#download\"]').click()");
+    await evaluate("document.querySelector('a[href=\"#hostiles\"]').click()");
     await delay(250);
     await send("Input.dispatchKeyEvent", {
       type: "keyDown",
@@ -404,7 +634,7 @@ try {
   await screenshot("desktop-hero");
   const desktopVitals = await evaluate("window.__vitals");
   await check("hostile scanner maps seven sprites and stays manual with cyclic navigation", async () => {
-    assert.equal(await evaluate("document.querySelector('#hostiles')?.previousElementSibling.id"), "pilots");
+    assert.equal(await evaluate("document.querySelector('#hostiles')?.previousElementSibling.id"), "gameplay");
     assert.equal(await evaluate("document.querySelector('#boss')?.previousElementSibling.id"), "hostiles");
     assert.equal(await evaluate("document.querySelector('#download')?.previousElementSibling.id"), "boss");
     assert.equal(await evaluate("document.querySelector('#hostiles h2').textContent.replace(/\\s+/g,' ').trim()"), "ENEMY FORCES");
@@ -587,6 +817,60 @@ try {
     }
     await screenshot("desktop-pilots");
   });
+  await check("full pilot cards highlight on hover keyboard focus and mobile selection", async () => {
+    await viewport(1440);
+    await load();
+    await evaluate("document.querySelector('#pilot-crewzer').scrollIntoView({behavior:'instant',block:'center'})");
+    await delay(1100);
+    for (const id of ["crewzer", "bomber", "panzer", "frigate", "lander"]) {
+      const selector = `#pilot-${id}`;
+      await evaluate("document.activeElement?.blur()");
+      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+      await delay(250);
+      const before = await evaluate(`(() => {
+        const card = document.querySelector('${selector}');
+        const bounds = card.parentElement.getBoundingClientRect();
+        return { width: bounds.width, border: getComputedStyle(card).borderTopColor };
+      })()`);
+      const target = await evaluate(`(() => {
+        const bounds = document.querySelector('${selector}').getBoundingClientRect();
+        return { x: bounds.left + bounds.width / 2, y: bounds.top + 40 };
+      })()`);
+      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: target.x, y: target.y });
+      await delay(250);
+      assert.notEqual(await evaluate(`getComputedStyle(document.querySelector('${selector}')).borderTopColor`), before.border);
+      assert.equal(await evaluate(`getComputedStyle(document.querySelector('${selector}'), '::before').opacity`), "1");
+      assert.equal(await evaluate(`document.querySelector('${selector}').parentElement.getBoundingClientRect().width`), before.width);
+      await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+      await evaluate(`document.querySelector('${selector}').focus({preventScroll:true})`);
+      await delay(250);
+      assert.equal(await evaluate("document.activeElement.id"), `pilot-${id}`);
+      assert.equal(await evaluate(`document.querySelector('${selector}').getAttribute('aria-labelledby')`), `pilot-name-${id}`);
+      assert.equal(await evaluate(`getComputedStyle(document.querySelector('${selector}'), '::before').opacity`), "1");
+      assert.equal(await evaluate(`getComputedStyle(document.querySelector('${selector} [data-pilot-intro]')).visibility`), "visible");
+      assert.ok(await evaluate(`(() => {
+        const card = document.querySelector('${selector}').getBoundingClientRect();
+        const image = document.querySelector('${selector} img').getBoundingClientRect();
+        return image.left >= card.left && image.right <= card.right && image.top >= card.top && image.bottom <= card.bottom;
+      })()`), `${id} portrait escapes its highlighted card`);
+    }
+    await screenshot("desktop-pilot-highlight");
+    await evaluate("document.activeElement?.blur()");
+    await viewport(390, 900, true);
+    await evaluate("document.querySelector('#pilot-roster').scrollTo({left:0,behavior:'instant'});document.querySelector('#pilots').scrollIntoView({behavior:'instant'})");
+    await waitFor(() => evaluate("document.querySelector('#pilot-crewzer').dataset.active === 'true'"), "Initial mobile pilot was not highlighted");
+    await evaluate("document.querySelector('[data-pilot-next]').click()");
+    await waitFor(() => evaluate("document.querySelector('#pilot-bomber').dataset.active === 'true'"), "Next mobile pilot did not receive the highlight");
+    await delay(300);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#pilot-bomber'), '::before').opacity"), "1");
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+    await evaluate("document.querySelector('#pilot-bomber').focus({preventScroll:true})");
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#pilot-bomber')).transform"), "none");
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('#pilot-bomber img')).transform"), "none");
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
+    await viewport(1440);
+    await load();
+  });
   await check("pilot roster scrolls on mobile and remains keyboard accessible", async () => {
     await viewport(390, 844, true);
     await evaluate("document.querySelector('#pilots').scrollIntoView({behavior:'instant'})");
@@ -716,7 +1000,7 @@ try {
     await delay(420);
     assert.match(await evaluate("document.querySelector('#machine-panel [data-active=true] h3').textContent"), /Lander/);
     assert.match(await evaluate("document.querySelector('#machine-panel [data-active=true]').textContent"), /Jamie Robinson/);
-    assert.equal(await evaluate("document.querySelectorAll('[role=tab][aria-selected=true]').length"), 1);
+    assert.equal(await evaluate("document.querySelectorAll('#machines [role=tab][aria-selected=true]').length"), 1);
     assert.equal(await evaluate("document.querySelectorAll('#machine-panel > div:first-child img').length"), 1);
   });
   await check("keyboard tabs wrap and support Home/End", async () => {
@@ -982,6 +1266,8 @@ try {
     assert.match(await evaluate("document.querySelector('#machine-panel [data-active=true] h3').textContent"), /Crewzer/);
     assert.match(await evaluate("document.querySelector('#hostiles').textContent"), /ENEMY.*FORCES.*Scout Drone/s);
     assert.match(await evaluate("document.querySelector('#boss').textContent"), /FINAL ENCOUNTER/);
+    assert.match(await evaluate("document.querySelector('#gameplay-combat').textContent"), /score climbing/);
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-gameplay-image=combat]')).opacity"), "1");
     await send("Emulation.setScriptExecutionDisabled", { value: false });
   });
   await check("no uncaught runtime or console errors", async () => assert.deepEqual(runtimeErrors, []));

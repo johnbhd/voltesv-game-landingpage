@@ -20,32 +20,23 @@ export function ReleaseSection() {
           <h2 id="release-title">
             READY TO<br />TAKE <span>FLIGHT?</span>
           </h2>
-          <p className={styles.description}>Your place in the formation is waiting.</p>
-          {action.href ? (
-            <a className={styles.releaseButton} href={action.href} download>
-              {action.label}<Arrow />
-            </a>
-          ) : (
-            <button
-              className={styles.releaseButton}
-              disabled
-              aria-describedby="release-status"
-            >
-              {action.label}<Arrow />
-            </button>
-          )}
+          <p className={styles.description}>
+            Download Voltes V Strike for Android and join the fight.
+          </p>
+          <a
+            className={styles.releaseButton}
+            href={action.href}
+            aria-describedby="release-status"
+            download
+          >
+            {action.label}
+            <Arrow />
+          </a>
           <p id="release-status" className={styles.status}>
             {action.version
               ? `ANDROID / VERSION ${action.version}`
-              : "ANDROID BUILD COMING SOON"}
+              : "ANDROID / APK DOWNLOAD"}
           </p>
-          <div id="gameplay" className={styles.gameplay}>
-            <span className={styles.playIcon} aria-hidden="true">▷</span>
-            <p>
-              GAMEPLAY FOOTAGE COMING SOON
-              <span>Real game captures will be added when available.</span>
-            </p>
-          </div>
         </Reveal>
       </div>
       <div className={styles.watermark} aria-hidden="true">

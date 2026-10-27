@@ -8,7 +8,44 @@
 .navigation a { display: flex; align-items: center; gap: 9px; min-height: 44px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #c4ccd7; transition: color .15s; }
 .navigation a:hover { color: var(--gold); }
 .navIndex { color: #657385; font: 10px var(--font-mono); }
-.headerCta { display: flex; align-items: center; gap: 24px; font: 700 11px var(--font-display); text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid var(--gold); min-height: 44px; color: var(--gold); }
+.headerCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 18px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #f6c74466;
+  color: var(--gold);
+  background: #0b101a;
+  font: 700 11px var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  transition: color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .18s ease;
+}
+
+.headerCta:hover,
+.headerCta:focus-visible {
+  color: var(--background);
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 18px #f6c74422;
+}
+
+.headerCta svg {
+  flex-shrink: 0;
+  transition: transform .2s ease;
+}
+
+.headerCta:hover svg,
+.headerCta:focus-visible svg {
+  transform: translateX(4px);
+}
+
+.headerCta:active {
+  transform: scale(.98);
+}
 .menuToggle { display: none; }
 .footer { max-width: 1600px; margin: auto; padding: 36px var(--gutter); display: flex; align-items: center; gap: 48px; border-top: 1px solid var(--border); }
 .footerBrand { font: 700 14px var(--font-display); letter-spacing: -.01em; }
@@ -20,7 +57,16 @@
 @media (max-width: 768px) {
   .headerInner { height: 72px; gap: 20px; }
   .wordmark { font-size: 12px; } .emblem { font-size: 36px; } .wordmarkSub { font-size: 8px; }
-  .headerCta { margin-left: auto; font-size: 10px; gap: 10px; } .headerCta svg { width: 14px; }
+  .headerCta {
+    margin-left: auto;
+    padding-inline: 10px;
+    font-size: 10px;
+    gap: 10px;
+  }
+
+  .headerCta svg {
+    width: 14px;
+  }
   .navigation { display: none; position: absolute; top: 72px; inset-inline: 0; padding: 16px var(--gutter) 28px; background: #05070dfa; border-bottom: 1px solid var(--border); }
   .navigation.open { display: grid; gap: 4px; }
   .navigation a { min-height: 54px; font-size: 13px; border-bottom: 1px solid var(--border); }
@@ -35,4 +81,17 @@
 :global(html[data-motion="reduce"]) .header,
 :global(html[data-motion="reduce"]) .navigation a {
   transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headerCta,
+  .headerCta svg {
+    transition: none;
+  }
+
+  .headerCta:active,
+  .headerCta:hover svg,
+  .headerCta:focus-visible svg {
+    transform: none;
+  }
 }

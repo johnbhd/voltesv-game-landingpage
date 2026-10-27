@@ -4,6 +4,7 @@ import { HeroSection } from "@/components/sections/HeroSection";
 import { MissionSection } from "@/components/sections/MissionSection";
 import { MachinesSection } from "@/components/sections/MachinesSection";
 import { PilotsSection } from "@/components/sections/PilotsSection";
+import { GameplaySection } from "@/components/sections/GameplaySection";
 import { HostilesSection } from "@/components/sections/HostilesSection";
 import { BossSection } from "@/components/sections/BossSection";
 import { ReleaseSection } from "@/components/sections/ReleaseSection";
@@ -17,6 +18,7 @@ export default function Home() {
         <MissionSection />
         <MachinesSection />
         <PilotsSection />
+        <GameplaySection />
         <HostilesSection />
         <BossSection />
         <ReleaseSection />
