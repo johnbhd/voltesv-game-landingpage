@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
-import { AnchorScroll } from "@/components/effects/AnchorScroll";
+import { SmoothScroll } from "@/components/effects/SmoothScroll";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-motion="full">
       <body id="top">
-        <AnchorScroll />
+        <SmoothScroll />
         <a className="skip-link" href="#main-content" data-scroll-instant>Skip to content</a>
         {children}
       </body>

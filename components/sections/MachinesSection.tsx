@@ -160,6 +160,7 @@ export function MachinesSection() {
           >
             <div
               className={styles.stage}
+              data-lenis-prevent-touch
               onTouchStart={(event) => {
                 touch.current = {
                   x: event.touches[0].clientX,

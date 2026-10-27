@@ -278,7 +278,28 @@ try {
     await viewport(1430, 900, false);
     await load();
   });
-  await check("same-page links use cancellable cinematic scrolling", async () => {
+  await check("wheel input retains reference-style momentum", async () => {
+    await viewport(1430, 900, false);
+    await load();
+    await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+    await send("Input.dispatchMouseEvent", {
+      type: "mouseWheel",
+      x: 1100,
+      y: 500,
+      deltaX: 0,
+      deltaY: 700,
+    });
+    await delay(80);
+    const firstPosition = Number(await evaluate("scrollY"));
+    await delay(220);
+    const continuedPosition = Number(await evaluate("scrollY"));
+    assert.ok(firstPosition > 0, "Wheel input did not begin scrolling");
+    assert.ok(
+      continuedPosition > firstPosition + 20,
+      `Wheel momentum stopped with the input event: ${firstPosition}/${continuedPosition}`,
+    );
+  });
+  await check("same-page links use 2.5 second cinematic scrolling", async () => {
     await viewport(1430, 900, false);
     await load();
     assert.equal(await evaluate("getComputedStyle(document.documentElement).scrollBehavior"), "auto");
@@ -295,32 +316,84 @@ try {
     const midwayY = Number(await evaluate("scrollY"));
     assert.ok(midwayY > 20 && midwayY < machinesDestination - 20, `Scroll did not visibly animate: ${midwayY}/${machinesDestination}`);
     assert.equal(await evaluate("location.hash"), "#machines");
+    await delay(900);
+    assert.ok(
+      await evaluate("Math.abs(document.querySelector('#machines').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) > 1"),
+      "The anchor animation completed before the reference-style duration",
+    );
     await waitFor(
-      () => evaluate("Math.abs(document.querySelector('#machines').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4"),
+      () => evaluate("document.activeElement?.id === 'machines'"),
       "Animated scroll did not align Machines below the fixed header",
-      1800,
+      3500,
     );
     const elapsed = Number(await evaluate("performance.now()")) - startedAt;
-    assert.ok(elapsed >= 1000 && elapsed < 1700, `Animated scroll duration was not approximately 1100ms: ${elapsed}ms`);
+    assert.ok(elapsed >= 2300 && elapsed < 3300, `Animated scroll duration was not approximately 2500ms: ${elapsed}ms`);
+    assert.ok(
+      await evaluate("Math.abs(document.querySelector('#machines').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4"),
+      "Animated scroll did not align Machines below the fixed header",
+    );
 
     await evaluate("document.querySelector('a[href=\"#download\"]').click()");
     await delay(250);
     await evaluate("document.querySelector('a[href=\"#mission\"]').click()");
     await waitFor(
-      () => evaluate("location.hash === '#mission' && Math.abs(document.querySelector('#mission').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4"),
+      () => evaluate("location.hash === '#mission' && document.activeElement?.id === 'mission' && Math.abs(document.querySelector('#mission').getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)) < 4"),
       "A second anchor did not replace the active scroll",
-      1800,
+      3500,
+    );
+
+    await evaluate("document.querySelector('footer a[href=\"#top\"]').click()");
+    await waitFor(() => evaluate("scrollY < 3 && location.hash === '#top'"), "Back-to-top link did not animate to the page origin", 3500);
+
+    await evaluate("document.querySelector('a[href=\"#download\"]').click()");
+    await delay(250);
+    const skipStartedAt = Number(await evaluate("performance.now()"));
+    await evaluate("document.querySelector('.skip-link').click()");
+    await waitFor(() => evaluate("location.hash === '#main-content'"), "Skip link did not use native navigation", 500);
+    const skipElapsed = Number(await evaluate("performance.now()")) - skipStartedAt;
+    assert.ok(skipElapsed < 500, `Skip link was incorrectly smoothed: ${skipElapsed}ms`);
+    await delay(2700);
+    assert.ok(await evaluate("scrollY < 3"), "The previous smooth scroll overrode the instant skip link");
+    assert.equal(
+      await evaluate("document.activeElement?.id"),
+      "main-content",
+      "The interrupted smooth scroll stole focus from the skip target",
     );
 
     await evaluate("document.querySelector('a[href=\"#download\"]').click()");
-    await delay(220);
-    await evaluate("window.dispatchEvent(new WheelEvent('wheel'))");
-    const interruptedY = Number(await evaluate("scrollY"));
-    await delay(400);
-    assert.ok(Math.abs(Number(await evaluate("scrollY")) - interruptedY) < 3, "Manual input did not cancel animated scrolling");
+    await delay(250);
+    await send("Input.dispatchKeyEvent", {
+      type: "keyDown",
+      code: "Home",
+      key: "Home",
+      nativeVirtualKeyCode: 36,
+      windowsVirtualKeyCode: 36,
+    });
+    await send("Input.dispatchKeyEvent", {
+      type: "keyUp",
+      code: "Home",
+      key: "Home",
+      nativeVirtualKeyCode: 36,
+      windowsVirtualKeyCode: 36,
+    });
+    await delay(2700);
+    assert.ok(await evaluate("scrollY < 3"), "The smooth scroll ignored native Home-key navigation");
+    assert.notEqual(
+      await evaluate("document.activeElement?.id"),
+      "download",
+      "The interrupted smooth scroll applied stale destination focus",
+    );
 
-    await evaluate("document.querySelector('footer a[href=\"#top\"]').click()");
-    await waitFor(() => evaluate("scrollY < 3 && location.hash === '#top'"), "Back-to-top link did not animate to the page origin", 1800);
+    await send("Page.navigate", { url: `${baseUrl}/?direct-link=1#machines` });
+    await waitFor(
+      () => evaluate("document.readyState === 'complete' && Boolean(document.querySelector('#machines'))"),
+      "Direct hash navigation did not render the target",
+      30000,
+    );
+    await delay(500);
+    assert.equal(await evaluate("location.hash"), "#machines");
+    assert.ok(await evaluate("scrollY > 500"), "Direct hash navigation did not reach Machines");
+    await load();
   });
   await check("fill images inside reveal wrappers keep a positioning context", async () => {
     assert.equal(
@@ -519,6 +592,10 @@ try {
     await evaluate("document.querySelector('#pilots').scrollIntoView({behavior:'instant'})");
     assert.ok(await evaluate("document.documentElement.scrollWidth<=innerWidth+1"));
     assert.ok(await evaluate("document.querySelector('#pilot-roster').scrollWidth>document.querySelector('#pilot-roster').clientWidth"));
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-pilot-next]')).display"), "flex");
+    assert.equal(await evaluate("document.querySelector('[data-pilot-counter]').textContent.trim()"), "01 / 05");
+    assert.match(await evaluate("document.querySelector('[data-pilot-next]').textContent"), /MARK GORDON/);
+    assert.equal(await evaluate("document.querySelector('[data-pilot-next]').getAttribute('aria-controls')"), "pilot-roster");
     await evaluate("document.querySelector('#pilot-roster').focus();document.querySelector('#pilot-roster').scrollTo({left:0,behavior:'instant'})");
     await send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
     await send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39 });
@@ -528,8 +605,21 @@ try {
     await delay(250);
     assert.equal(await evaluate("document.activeElement.id"), "pilot-roster");
     assert.ok(await evaluate("document.querySelector('#pilot-lander').getBoundingClientRect().right<=innerWidth+1"));
-    await screenshot("mobile-pilots");
+    await evaluate("document.querySelector('#pilot-roster').scrollTo({left:0,behavior:'instant'})");
+    await delay(250);
+    assert.equal(await evaluate("document.querySelector('[data-pilot-counter]').textContent.trim()"), "01 / 05");
+    await evaluate("document.querySelector('[data-pilot-next]').click()");
+    await waitFor(() => evaluate("document.querySelector('[data-pilot-counter]').textContent.trim() === '02 / 05'"), "Next pilot button did not advance to Mark");
+    assert.match(await evaluate("document.querySelector('[data-pilot-next]').textContent"), /BIG BERT ARMSTRONG/);
+    await evaluate("document.querySelector('[data-pilot-next]').click();document.querySelector('[data-pilot-next]').click();document.querySelector('[data-pilot-next]').click();document.querySelector('[data-pilot-next]').click()");
+    await waitFor(() => evaluate("document.querySelector('[data-pilot-counter]').textContent.trim() === '01 / 05'"), "Next pilot button did not loop back to Steve");
+    assert.match(await evaluate("document.querySelector('[data-pilot-next]').textContent"), /MARK GORDON/);
     await viewport(1440);
+    await load();
+    assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-pilot-controls]')).display"), "none");
+    await viewport(390, 844, true);
+    await evaluate("document.querySelector('#pilots').scrollIntoView({behavior:'instant'})");
+    await screenshot("mobile-pilots");
   });
   await check("hero rotates the roster every five seconds independently from the showcase", async () => {
     await load();
@@ -769,6 +859,32 @@ try {
     await waitFor(() => evaluate("document.querySelector('button[aria-controls=site-navigation]').getAttribute('aria-expanded')==='false'"), "Escape did not close navigation");
     assert.equal(await evaluate("document.activeElement.getAttribute('aria-controls')"), "site-navigation");
   });
+  await check("touch input retains mobile momentum", async () => {
+    await load();
+    await evaluate("window.scrollTo({top:0,behavior:'instant'})");
+    await delay(120);
+    await send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: 350, y: 700 }],
+    });
+    await send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: 350, y: 340 }],
+    });
+    await send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    const releasedPosition = Number(await evaluate("scrollY"));
+    await delay(220);
+    const momentumPosition = Number(await evaluate("scrollY"));
+    assert.ok(releasedPosition > 0, "Touch input did not begin scrolling");
+    assert.ok(
+      momentumPosition > releasedPosition + 10,
+      `Touch momentum stopped at release: ${releasedPosition}/${momentumPosition}`,
+    );
+    await load();
+  });
   await evaluate("document.querySelector('#machines').scrollIntoView({behavior:'instant'})");
   await delay(250);
   await check("horizontal mobile swipe selects without moving the page", async () => {
@@ -853,7 +969,15 @@ try {
   });
   await check("content remains readable without JavaScript", async () => {
     await send("Emulation.setScriptExecutionDisabled", { value: true });
-    await load();
+    await send("Page.navigate", { url: `${baseUrl}#machines` });
+    await waitFor(
+      () => evaluate("document.readyState === 'complete' && Boolean(document.querySelector('#machines'))"),
+      "No-JavaScript page did not render the direct hash target",
+      30000,
+    );
+    await delay(500);
+    assert.equal(await evaluate("location.hash"), "#machines");
+    assert.ok(await evaluate("scrollY > 500"), "No-JavaScript hash navigation did not reach Machines");
     assert.equal(await evaluate("getComputedStyle(document.querySelector('h1')).opacity"), "1");
     assert.match(await evaluate("document.querySelector('#machine-panel [data-active=true] h3').textContent"), /Crewzer/);
     assert.match(await evaluate("document.querySelector('#hostiles').textContent"), /ENEMY.*FORCES.*Scout Drone/s);
